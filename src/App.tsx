@@ -1,11 +1,12 @@
 import './App.css'
-import Header from "./header";
+import Header from "./Header";
+import Pad from "./Pad";
 
 function App() {
   return (
     <>
-      <Header />
-      <p>첫 React 프로젝트입니다.</p>
+      <Header title="스도쿠" />
+      <Pad />
     </>
   );
 }

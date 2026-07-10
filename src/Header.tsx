@@ -1,5 +1,9 @@
-function Header() {
-    return <h1>스도쿠</h1>;
+type HeaderProps = {
+    title: string;
+};
+
+function Header({ title }: HeaderProps) {
+    return <h1>{title}</h1>;
 }
 
 export default Header;
