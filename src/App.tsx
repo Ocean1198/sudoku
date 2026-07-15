@@ -1,13 +1,9 @@
 import './App.css'
-import Header from "./Header";
-import Pad from "./Pad";
+import SudokuGame from './components/SudokuGame'
 
 function App() {
   return (
-    <>
-      <Header title="스도쿠" />
-      <Pad />
-    </>
+    <SudokuGame />
   );
 }
 

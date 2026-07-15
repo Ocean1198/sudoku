@@ -1,0 +1,10 @@
+.board {
+    display: inline-flex;
+    flex-direction: column;
+
+    border: 2px solid black;
+}
+
+.row {
+    display: flex;
+}
