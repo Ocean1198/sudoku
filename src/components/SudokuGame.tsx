@@ -8,12 +8,15 @@ function SudokuGame() {
   const [current, setCurrent] = useState<number[][]>([]);
 
   const [selected, setSelected] = useState<{
-    row: Number;
-    col: Number;
+    row: number;
+    col: number;
   } | null>(null);
 
-  const [br, setBr] = useState(3);
-  const [bc, setBc] = useState(3);
+  const [config, setConfig] = useState({
+    br: 3,
+    bc: 3,
+    level: 0
+  });
   
   const generateSudoku = (br: number, bc: number, level: number) => {
     const { answer, puzzle } = generate(br, bc, level);
@@ -22,14 +25,20 @@ function SudokuGame() {
     setCurrent(puzzle.map(row => row.slice()));
   }
 
+  const handleSelect = (row: number, col: number) => {
+    setSelected({ row, col });
+  };
+
   useEffect(() => {
-    generateSudoku(3, 3, 0);
+    generateSudoku(config.br, config.bc, config.level);
   }, []);
 
   return (
     <SudokuBoard
       /* prop 전달 */
       puzzle={puzzle}
+      selected={selected}
+      onSelect={handleSelect}
     />
   );
 }

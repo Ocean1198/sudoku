@@ -13,3 +13,6 @@
 
     user-select: none;
 }
+.selected {
+    background-color: #dbeafe;
+}
