@@ -6,6 +6,14 @@ function SudokuGame() {
   const [solution, setSolution] = useState<number[][]>([]);
   const [puzzle, setPuzzle] = useState<number[][]>([]);
   const [current, setCurrent] = useState<number[][]>([]);
+
+  const [selected, setSelected] = useState<{
+    row: Number;
+    col: Number;
+  } | null>(null);
+
+  const [br, setBr] = useState(3);
+  const [bc, setBc] = useState(3);
   
   const generateSudoku = (br: number, bc: number, level: number) => {
     const { answer, puzzle } = generate(br, bc, level);
