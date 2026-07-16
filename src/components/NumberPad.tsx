@@ -1,18 +1,24 @@
-const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+import styles from "./NumberPad.module.css";
 
-function Pad() {
+type NumberPadProps = {
+  size: number;
+  onInput: (value: number) => void;
+};
+
+function NumberPad ({ size, onInput }: NumberPadProps) {
     return (
-        <>
-            {numbers.map((number) => (
+        <div className={styles.pad}>
+            {Array.from({ length: size + 1 }, (_, i) => (
                 <button 
-                    key={number}
-                    onClick={() => {console.log(number)}}
+                    key={i}
+                    className={styles.button}
+                    onClick={() => onInput(i)}
                 >
-                    {number}
+                    {i}
                 </button>
             ))}
-        </>
-    );
+        </div>
+    )
 }
 
-export default Pad;
+export default NumberPad

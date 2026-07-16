@@ -1,0 +1,13 @@
+.pad {
+    display: flex;
+    gap: 8px;
+
+    margin-top: 16px;
+}
+
+.button {
+    width: 40px;
+    height: 40px;
+
+    font-size: 1rem;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { generate } from '../lib/sudokuGenerator';
 import SudokuBoard from './SudokuBoard';
+import NumberPad from './NumberPad';
 
 function SudokuGame() {
   const [solution, setSolution] = useState<number[][]>([]);
@@ -29,17 +30,26 @@ function SudokuGame() {
     setSelected({ row, col });
   };
 
+  const handleInput = (value: number) => {
+    console.log(value);
+  }
+
   useEffect(() => {
     generateSudoku(config.br, config.bc, config.level);
   }, []);
 
   return (
-    <SudokuBoard
-      /* prop 전달 */
-      puzzle={puzzle}
-      selected={selected}
-      onSelect={handleSelect}
-    />
+    <>
+      <SudokuBoard
+        puzzle={puzzle}
+        selected={selected}
+        onSelect={handleSelect}
+      />
+      <NumberPad
+        size={config.br * config.bc}
+        onInput={handleInput}
+      />
+    </>
   );
 }
 
