@@ -31,7 +31,12 @@ function SudokuGame() {
   };
 
   const handleInput = (value: number) => {
+    if (selected === null) return;
+    if (puzzle[selected.row][selected.col] !== 0) return;
+    const next = current.map(row => row.slice());
+    next[selected.row][selected.col] = value;
     console.log(value);
+    setCurrent(next);
   }
 
   useEffect(() => {
@@ -41,7 +46,7 @@ function SudokuGame() {
   return (
     <>
       <SudokuBoard
-        puzzle={puzzle}
+        puzzle={current}
         selected={selected}
         onSelect={handleSelect}
       />
