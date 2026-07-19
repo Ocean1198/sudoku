@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { generate } from '../lib/sudokuGenerator';
+import { findViolations, checkAnswer } from '../lib/sudokuRules'
 import SudokuBoard from './SudokuBoard';
 import NumberPad from './NumberPad';
 
@@ -33,10 +34,12 @@ function SudokuGame() {
   const handleInput = (value: number) => {
     if (selected === null) return;
     if (puzzle[selected.row][selected.col] !== 0) return;
-    const next = current.map(row => row.slice());
-    next[selected.row][selected.col] = value;
-    console.log(value);
-    setCurrent(next);
+    if (current[selected.row][selected.col] === value) return;
+    setCurrent(prev => {
+      const next = prev.map(row => row.slice());
+      next[selected.row][selected.col] = value;
+      return next;
+    });
   }
 
   useEffect(() => {
