@@ -12,7 +12,33 @@
     font-weight: bold;
 
     user-select: none;
+
+    color: #888;
+    background-color: white;
+}
+.userInput {
+    color: #496dbc;
+}
+.conflict {
+    color: #ce4949;
+    background-color: #ffbebe;
+}
+.revealed {
+    color: #dc2626;
 }
 .selected {
     background-color: #dbeafe;
 }
+/*
+글자색
+검정: 기본(원본 퍼즐)
+파랑: 사용자 입력(정상)
+빨강: 사용자 입력(충돌), 정답 공개
+>> 기본값은 색 변경 X
+
+바탕색
+흰색: 기본
+파랑: 선택(selected)
+빨강: 충돌
+>> 선택 바탕색(파랑) 우선
+*/

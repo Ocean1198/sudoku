@@ -1,29 +1,31 @@
-import SudokuCell from './SudokuCell'
+import SudokuCell, { type CellState } from './SudokuCell'
 import styles from './SudokuBoard.module.css'
 
 type SudokuBoardProps = {
-  puzzle: number[][];
+  puzzle: CellState[][];
   selected: {
     row: number;
     col: number;
   } | null;
+  isRevealed: boolean;
   onSelect: (row: number, col: number) => void;
 };
 
-function SudokuBoard({ puzzle, selected, onSelect }: SudokuBoardProps) {
+function SudokuBoard({ puzzle, selected, isRevealed, onSelect }: SudokuBoardProps) {
   return (
     <div className={styles.board}>
       {puzzle.map((row, r) => (
         <div className={styles.row} key = {r}>
-          {row.map((value, c) => (
+          {row.map((cell, c) => (
             <SudokuCell
               row={r}
               col={c}
-              value={value}
-              selected={
+              state={cell}
+              isSelected={
                 selected?.row === r &&
                 selected?.col === c
               }
+              isRevealed={isRevealed}
               onSelect={onSelect}
             />
           ))}
