@@ -4,6 +4,7 @@ import { findViolations, checkAnswer } from '../lib/sudokuRules'
 import SudokuBoard from './SudokuBoard';
 import { type CellState } from './SudokuCell';
 import NumberPad from './NumberPad';
+import GameControls from './GameControls';
 
 function SudokuGame() {
   const [solution, setSolution] = useState<number[][]>([]);
@@ -70,6 +71,31 @@ function SudokuGame() {
     paintBoard();
   }
 
+  const handleCheck = () => {
+    const currentValues = current.map(row => row.map(cell => cell.value));
+    const isCorrect = checkAnswer(currentValues, solution, config.br * config.bc);
+    if (isCorrect) {
+      alert("keep going!");
+    } else {
+      alert("something is wrong...");
+    }
+  }
+
+  const handleGiveUp = () => {
+    setCurrent(prev => {
+      const next = prev.map(row => row.slice());
+      for (let r = 0; r < config.br * config.bc; r++) {
+        for (let c = 0; c < config.br * config.bc; c++) {
+          if (puzzle[r][c] !== 0) continue;
+          next[r][c].value = solution[r][c];
+          next[r][c].isUserInput = false;
+          next[r][c].isConflict = true;
+        }
+      }
+      return next;
+    });
+  }
+
   useEffect(() => {
     generateSudoku(config.br, config.bc, config.level);
   }, []);
@@ -85,6 +111,11 @@ function SudokuGame() {
       <NumberPad
         size={config.br * config.bc}
         onInput={handleInput}
+      />
+      <GameControls
+        disabled={false}
+        onCheck={handleCheck}
+        onGiveUp={handleGiveUp}
       />
     </>
   );
