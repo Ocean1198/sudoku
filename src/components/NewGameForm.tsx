@@ -21,6 +21,10 @@ function NewGameForm({ initialConfig, onStart }: NewGameFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (br * bc > 16) {
+      alert("The total number of cells (br * bc) must not exceed 16.");
+      return;
+    }
     const parsedSeed = Number.parseInt(seed, 10);
     onStart({ br, bc, level, ...(Number.isNaN(parsedSeed) ? {} : { seed: parsedSeed }) });
   }
