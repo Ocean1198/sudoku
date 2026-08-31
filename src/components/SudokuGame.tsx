@@ -11,6 +11,8 @@ function SudokuGame() {
   const [puzzle, setPuzzle] = useState<number[][]>([]);
   const [current, setCurrent] = useState<CellState[][]>([]);
 
+  const [gameStatus, setGameStatus] = useState<"playing" | "won" | "gave_up">("playing");
+
   const [selected, setSelected] = useState<{
     row: number;
     col: number;
@@ -55,10 +57,12 @@ function SudokuGame() {
   }
 
   const handleSelect = (row: number, col: number) => {
+    if (gameStatus !== "playing") return;
     setSelected({ row, col });
   };
 
   const handleInput = (value: number) => {
+    if (gameStatus !== "playing") return;
     if (selected === null) return;
     if (puzzle[selected.row][selected.col] !== 0) return;
     if (current[selected.row][selected.col].value === value) return;
@@ -72,6 +76,7 @@ function SudokuGame() {
   }
 
   const handleCheck = () => {
+    if (gameStatus !== "playing") return;
     const currentValues = current.map(row => row.map(cell => cell.value));
     const isCorrect = checkAnswer(currentValues, solution, config.br * config.bc);
     if (isCorrect) {
@@ -82,6 +87,7 @@ function SudokuGame() {
   }
 
   const handleGiveUp = () => {
+    if (gameStatus !== "playing") return;
     setCurrent(prev => {
       const next = prev.map(row => row.slice());
       for (let r = 0; r < config.br * config.bc; r++) {
@@ -95,6 +101,8 @@ function SudokuGame() {
       }
       return next;
     });
+    setSelected(null);
+    setGameStatus("gave_up");
   }
 
   useEffect(() => {
@@ -109,10 +117,12 @@ function SudokuGame() {
         onSelect={handleSelect}
       />
       <NumberPad
+        disabled={gameStatus !== "playing"}
         size={config.br * config.bc}
         onInput={handleInput}
       />
       <GameControls
+        disabled={gameStatus !== "playing"}
         onCheck={handleCheck}
         onGiveUp={handleGiveUp}
       />
