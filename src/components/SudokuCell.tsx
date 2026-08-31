@@ -12,16 +12,20 @@ type SudokuCellProps = {
   col: number;
   state: CellState;
   isSelected: boolean;
+  isBlockRight: boolean;
+  isBlockBottom: boolean;
   onSelect: (row: number, col: number) => void;
 };
 
-function SudokuCell({ row, col, state, isSelected, onSelect }: SudokuCellProps) {
+function SudokuCell({ row, col, state, isSelected, isBlockRight, isBlockBottom, onSelect }: SudokuCellProps) {
   const className = [
     styles.cell,
     state.isUserInput && styles.userInput,
     state.isConflict && styles.conflict,
     state.isRevealed && styles.revealed,
     isSelected && styles.selected,
+    isBlockRight && styles.blockRight,
+    isBlockBottom && styles.blockBottom,
   ].filter(Boolean).join(" ");
   return (
     <div 

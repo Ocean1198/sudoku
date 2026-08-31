@@ -1,10 +1,11 @@
 .board {
-    display: inline-flex;
-    flex-direction: column;
-
-    border: 2px solid black;
-}
-
-.row {
-    display: flex;
+    display: grid;
+    width: min(92vw, 540px);
+    max-width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    border: 3px solid #1f2937;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background: #1f2937;
 }

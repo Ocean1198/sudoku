@@ -1,17 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { generate } from '../lib/sudokuGenerator';
 import { findViolations, checkAnswer } from '../lib/sudokuRules'
 import SudokuBoard from './SudokuBoard';
 import { type CellState } from './SudokuCell';
 import NumberPad from './NumberPad';
 import GameControls from './GameControls';
-import {type GameConfig} from './NewGameForm';
+import { type GameConfig } from './NewGameForm';
 import NewGameForm from './NewGameForm';
+import styles from './SudokuGame.module.css';
+
+function createGame(br: number, bc: number, level: number, seed?: number) {
+  const { answer, puzzle } = generate(br, bc, level, seed);
+  return {
+    answer,
+    puzzle,
+    current: puzzle.map(row =>
+      row.map(value => ({
+        value,
+        isUserInput: value === 0,
+        isConflict: false,
+        isRevealed: false,
+      }))
+    ),
+  };
+}
 
 function SudokuGame() {
-  const [solution, setSolution] = useState<number[][]>([]);
-  const [puzzle, setPuzzle] = useState<number[][]>([]);
-  const [current, setCurrent] = useState<CellState[][]>([]);
+  const [initialGame] = useState(() => createGame(3, 3, 0));
+  const [solution, setSolution] = useState<number[][]>(initialGame.answer);
+  const [puzzle, setPuzzle] = useState<number[][]>(initialGame.puzzle);
+  const [current, setCurrent] = useState<CellState[][]>(initialGame.current);
 
   const [gameStatus, setGameStatus] = useState<"playing" | "won" | "gave_up">("playing");
 
@@ -20,26 +38,17 @@ function SudokuGame() {
     col: number;
   } | null>(null);
 
-  const [config, setConfig] = useState({
+  const [config, setConfig] = useState<GameConfig>({
     br: 3,
     bc: 3,
     level: 0
   });
   
-  const generateSudoku = (br: number, bc: number, level: number) => {
-    const { answer, puzzle } = generate(br, bc, level);
-    setSolution(answer);
-    setPuzzle(puzzle);
-    setCurrent(
-      puzzle.map(row =>
-        row.map(value => ({
-          value,
-          isUserInput: value === 0,
-          isConflict: false,
-          isRevealed: false,
-        }))
-      )
-    );
+  const generateSudoku = (br: number, bc: number, level: number, seed?: number) => {
+    const game = createGame(br, bc, level, seed);
+    setSolution(game.answer);
+    setPuzzle(game.puzzle);
+    setCurrent(game.current);
   }
 
   const paintBoard = (): void => {
@@ -81,7 +90,12 @@ function SudokuGame() {
     if (gameStatus !== "playing") return;
     const currentValues = current.map(row => row.map(cell => cell.value));
     const isCorrect = checkAnswer(currentValues, solution, config.br * config.bc);
-    if (isCorrect) {
+    const isComplete = currentValues.every(row => row.every(value => value !== 0));
+    if (isCorrect && isComplete) {
+      alert("You won!");
+      setSelected(null);
+      setGameStatus("won");
+    } else if (isCorrect) {
       alert("keep going!");
     } else {
       alert("something is wrong...");
@@ -107,14 +121,12 @@ function SudokuGame() {
     setGameStatus("gave_up");
   }
 
-  useEffect(() => {
-    generateSudoku(config.br, config.bc, config.level);
-  }, []);
-
   return (
-    <>
+    <main className={styles.game}>
       <SudokuBoard
         puzzle={current}
+        blockRows={config.br}
+        blockColumns={config.bc}
         selected={selected}
         onSelect={handleSelect}
       />
@@ -128,17 +140,18 @@ function SudokuGame() {
         onCheck={handleCheck}
         onGiveUp={handleGiveUp}
       />
-      <NewGameForm
-        disabled={gameStatus === "playing"}
-        initialConfig={config}
-        onStart={(newConfig: GameConfig) => {
-          setConfig(newConfig);
-          generateSudoku(newConfig.br, newConfig.bc, newConfig.level);
-          setGameStatus("playing");
-          setSelected(null);
-        }}
-      />
-    </>
+      {gameStatus !== "playing" && (
+        <NewGameForm
+          initialConfig={config}
+          onStart={(newConfig: GameConfig) => {
+            setConfig(newConfig);
+            generateSudoku(newConfig.br, newConfig.bc, newConfig.level, newConfig.seed);
+            setGameStatus("playing");
+            setSelected(null);
+          }}
+        />
+      )}
+    </main>
   );
 }
 

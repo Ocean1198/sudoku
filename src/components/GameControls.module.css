@@ -1,0 +1,42 @@
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.controls button {
+  min-width: 108px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.controls button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgb(15 23 42 / 18%);
+}
+
+.checkButton {
+  color: #fff;
+  background: #2563eb;
+}
+
+.giveUpButton {
+  color: #b91c1c;
+  background: #fff;
+  border-color: #fecaca !important;
+}
+
+.controls button:disabled {
+  color: #9ca3af;
+  background: #e5e7eb;
+  border-color: #e5e7eb !important;
+  cursor: not-allowed;
+  box-shadow: none;
+}

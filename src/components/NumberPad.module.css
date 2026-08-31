@@ -1,5 +1,7 @@
 .pad {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 8px;
 
     margin-top: 16px;
@@ -10,4 +12,20 @@
     height: 40px;
 
     font-size: 1rem;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    color: #1d4ed8;
+    background: #eff6ff;
+    cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+    background: #dbeafe;
+}
+
+.button:disabled {
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    background: #f3f4f6;
+    cursor: not-allowed;
 }

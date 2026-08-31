@@ -1,12 +1,13 @@
 .cell {
-    width: 40px;
-    height: 40px;
-
     display: flex;
     justify-content: center;
     align-items: center;
 
-    border: 1px solid #888;
+    min-width: 0;
+    aspect-ratio: 1;
+    box-sizing: border-box;
+    border-right: 1px solid #9ca3af;
+    border-bottom: 1px solid #9ca3af;
 
     font-size: 1.2rem;
     font-weight: bold;
@@ -15,6 +16,14 @@
 
     color: #888;
     background-color: white;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+.blockRight {
+    border-right: 3px solid #1f2937;
+}
+.blockBottom {
+    border-bottom: 3px solid #1f2937;
 }
 .userInput {
     color: #496dbc;

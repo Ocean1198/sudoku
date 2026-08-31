@@ -1,0 +1,10 @@
+.game {
+  width: min(100%, 620px);
+  margin: 0 auto;
+  padding: 32px 16px;
+  box-sizing: border-box;
+}
+
+.game > * + * {
+  margin-top: 16px;
+}

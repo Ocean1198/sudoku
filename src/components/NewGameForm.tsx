@@ -1,4 +1,5 @@
 import { useState } from "react";
+import styles from './NewGameForm.module.css';
 
 export interface GameConfig {
   br: number; // block rows
@@ -8,72 +9,67 @@ export interface GameConfig {
 }
 
 type NewGameFormProps = {
-  disabled?: boolean;
   initialConfig: GameConfig;
   onStart: (config: GameConfig) => void;
 };
 
-function NewGameForm({ disabled, initialConfig, onStart }: NewGameFormProps) {
+function NewGameForm({ initialConfig, onStart }: NewGameFormProps) {
   const [br, setBr] = useState(initialConfig.br);
   const [bc, setBc] = useState(initialConfig.bc);
   const [level, setLevel] = useState(initialConfig.level);
+  const [seed, setSeed] = useState(initialConfig.seed?.toString() ?? "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onStart({ br, bc, level });
+    const parsedSeed = Number.parseInt(seed, 10);
+    onStart({ br, bc, level, ...(Number.isNaN(parsedSeed) ? {} : { seed: parsedSeed }) });
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
+    <form className={styles.form} onSubmit={handleSubmit}>
+      <h2>Start a new game</h2>
+      <div className={styles.fields}>
         <label>
-          Block Rows:
+          <span>Block rows</span>
           <input
             type="number"
             value={br}
             onChange={(e) => setBr(parseInt(e.target.value) || 0)}
-            disabled={disabled}
+            min="1"
+            required
           />
         </label>
-      </div>
-      <div>
         <label>
-          Block Columns:
+          <span>Block columns</span>
           <input
             type="number"
             value={bc}
             onChange={(e) => setBc(parseInt(e.target.value) || 0)}
-            disabled={disabled}
+            min="1"
+            required
           />
         </label>
-      </div>
-      <div>
         <label>
-          Level:
+          <span>Level</span>
           <input
             type="number"
             value={level}
             onChange={(e) => setLevel(parseInt(e.target.value) || 0)}
-            disabled={disabled}
+            min="0"
+            max="3"
+            required
           />
         </label>
-      </div>
-      <div>
         <label>
-          Seed (optional):
+          <span>Seed (optional)</span>
           <input
             type="number"
-            onChange={(e) => {
-              const seed = parseInt(e.target.value);
-              if (!isNaN(seed)) {
-                onStart({ br, bc, level, seed });
-              }
-            }}
-            disabled={disabled}
+            value={seed}
+            onChange={(e) => setSeed(e.target.value)}
           />
         </label>
       </div>
-      <button type="submit" disabled={disabled}>
+      <button type="submit">
         Start Game
       </button>
     </form>
