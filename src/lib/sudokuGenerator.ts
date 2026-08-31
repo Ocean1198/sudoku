@@ -3,7 +3,7 @@ generate.js를 옮깁니다.
 findviolations, isCorrectAnswer 등 검증 로직은 sudokuRules.ts로 옮깁니다.
 */
 
-export function generate(br: number, bc: number, level: number, seed = 42): { answer: number[][]; puzzle: number[][] } {
+export function generate(br: number, bc: number, level: number, seed = Math.floor(Math.random() * 2 ** 32)): { answer: number[][]; puzzle: number[][] } {
 
     const random: () => number = mulberry32(seed);
 
