@@ -33,6 +33,15 @@ function SudokuGame() {
 
   const [gameStatus, setGameStatus] = useState<"playing" | "won" | "gave_up">("playing");
 
+  type AssistState = {
+    hintCount: number;
+    wrongCheckCount: number;
+  }
+  const [assistState, setAssistState] = useState<AssistState>({
+    hintCount: 0, // 현재는 힌트 기능이 없으므로 0으로 고정, 이후에 추가
+    wrongCheckCount: 0
+  });
+
   const [selected, setSelected] = useState<{
     row: number;
     col: number;
@@ -92,12 +101,20 @@ function SudokuGame() {
     const isCorrect = checkAnswer(currentValues, solution, config.br * config.bc);
     const isComplete = currentValues.every(row => row.every(value => value !== 0));
     if (isCorrect && isComplete) {
-      alert("You won!");
+      const score = 100 - (assistState.wrongCheckCount * 10 + assistState.hintCount * 30);
+      if (score === 100) {
+        alert("Perfect!");
+      } else if (score >= 70) {
+        alert("You won!");
+      } else {
+        alert("Well done!");
+      }
       setSelected(null);
       setGameStatus("won");
     } else if (isCorrect) {
       alert("keep going!");
     } else {
+      setAssistState(prev => ({ ...prev, wrongCheckCount: prev.wrongCheckCount + 1 }));
       alert("something is wrong...");
     }
   }
