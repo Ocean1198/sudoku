@@ -5,6 +5,8 @@ import SudokuBoard from './SudokuBoard';
 import { type CellState } from './SudokuCell';
 import NumberPad from './NumberPad';
 import GameControls from './GameControls';
+import {type GameConfig} from './NewGameForm';
+import NewGameForm from './NewGameForm';
 
 function SudokuGame() {
   const [solution, setSolution] = useState<number[][]>([]);
@@ -125,6 +127,16 @@ function SudokuGame() {
         disabled={gameStatus !== "playing"}
         onCheck={handleCheck}
         onGiveUp={handleGiveUp}
+      />
+      <NewGameForm
+        disabled={gameStatus === "playing"}
+        initialConfig={config}
+        onStart={(newConfig: GameConfig) => {
+          setConfig(newConfig);
+          generateSudoku(newConfig.br, newConfig.bc, newConfig.level);
+          setGameStatus("playing");
+          setSelected(null);
+        }}
       />
     </>
   );
