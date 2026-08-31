@@ -89,7 +89,8 @@ function SudokuGame() {
           if (puzzle[r][c] !== 0) continue;
           next[r][c].value = solution[r][c];
           next[r][c].isUserInput = false;
-          next[r][c].isConflict = true;
+          next[r][c].isConflict = false;
+          next[r][c].isRevealed = true;
         }
       }
       return next;
@@ -106,14 +107,12 @@ function SudokuGame() {
         puzzle={current}
         selected={selected}
         onSelect={handleSelect}
-        isRevealed={false} // 이후 정답 공개 기능 생기면 수정.
       />
       <NumberPad
         size={config.br * config.bc}
         onInput={handleInput}
       />
       <GameControls
-        disabled={false}
         onCheck={handleCheck}
         onGiveUp={handleGiveUp}
       />

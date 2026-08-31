@@ -7,11 +7,10 @@ type SudokuBoardProps = {
     row: number;
     col: number;
   } | null;
-  isRevealed: boolean;
   onSelect: (row: number, col: number) => void;
 };
 
-function SudokuBoard({ puzzle, selected, isRevealed, onSelect }: SudokuBoardProps) {
+function SudokuBoard({ puzzle, selected, onSelect }: SudokuBoardProps) {
   return (
     <div className={styles.board}>
       {puzzle.map((row, r) => (
@@ -25,7 +24,6 @@ function SudokuBoard({ puzzle, selected, isRevealed, onSelect }: SudokuBoardProp
                 selected?.row === r &&
                 selected?.col === c
               }
-              isRevealed={isRevealed}
               onSelect={onSelect}
             />
           ))}
