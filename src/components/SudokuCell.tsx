@@ -11,13 +11,14 @@ type SudokuCellProps = {
   row: number;
   col: number;
   state: CellState;
+  memo: number[];
   isSelected: boolean;
   isBlockRight: boolean;
   isBlockBottom: boolean;
   onSelect: (row: number, col: number) => void;
 };
 
-function SudokuCell({ row, col, state, isSelected, isBlockRight, isBlockBottom, onSelect }: SudokuCellProps) {
+function SudokuCell({ row, col, state, memo, isSelected, isBlockRight, isBlockBottom, onSelect }: SudokuCellProps) {
   const className = [
     styles.cell,
     state.isUserInput && styles.userInput,
@@ -34,9 +35,30 @@ function SudokuCell({ row, col, state, isSelected, isBlockRight, isBlockBottom, 
       }
       onClick={()=>onSelect(row, col)}
     >
-      {state.value === 0 ? "" : state.value}
+      {state.value !== 0 ? state.value : <Memo values={memo} />}
     </div>
   )
+}
+
+function Memo({ values }: { values: number[] }) {
+  if (values.length === 0) return null;
+
+  const visibleValues = values.slice(0, 9);
+  const usesNineSlots = values.length >= 5;
+  const slotCount = usesNineSlots ? 9 : 4;
+
+  return (
+    <div
+      className={`${styles.memo} ${usesNineSlots ? styles.memoNine : styles.memoFour}`}
+      aria-label={`메모: ${visibleValues.join(', ')}`}
+    >
+      {Array.from({ length: slotCount }, (_, index) => (
+        <span className={styles.memoItem} key={index}>
+          {visibleValues[index] ?? ''}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 export default SudokuCell;

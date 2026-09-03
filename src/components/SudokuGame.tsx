@@ -22,6 +22,7 @@ function createGame(br: number, bc: number, level: number, seed?: number) {
         isRevealed: false,
       }))
     ),
+    memo: puzzle.map(row => row.map(() => []))
   };
 }
 
@@ -31,9 +32,7 @@ function SudokuGame() {
   const [puzzle, setPuzzle] = useState<number[][]>(initialGame.puzzle);
   const [current, setCurrent] = useState<CellState[][]>(initialGame.current);
   const [memoStatus, setMemoStatus] = useState<boolean>(false);
-  const [memoBoard, setMemoBoard] = useState<number[][][]>( // row, col, num
-    initialGame.puzzle.map(row =>row.map(() => []))
-  );
+  const [memoBoard, setMemoBoard] = useState<number[][][]>(initialGame.memo); // row, col, num
 
   const [gameStatus, setGameStatus] = useState<"playing" | "won" | "gave_up">("playing");
 
@@ -62,6 +61,8 @@ function SudokuGame() {
     setSolution(game.answer);
     setPuzzle(game.puzzle);
     setCurrent(game.current);
+    setMemoBoard(game.memo);
+    setMemoStatus(false);
   }
 
   const paintBoard = (): void => {
@@ -102,11 +103,18 @@ function SudokuGame() {
       next[selected.row][selected.col].value = value;
       return next;
     });
+    setMemoBoard(prev => {
+      const next = prev.map(row => row.map(cell => [...cell]));
+      next[selected.row][selected.col] = [];
+      return next;
+    });
     paintBoard();
   }
 
   const handleMemoInput = (value: number) => {
     if (selected === null) return;
+    if (puzzle[selected.row][selected.col] !== 0) return;
+    if (current[selected.row][selected.col].value !== 0) return;
     setMemoBoard(prev => {
       const next = prev.map(row => row.map(cell => [...cell]));
       const cell = next[selected.row][selected.col];
@@ -163,6 +171,16 @@ function SudokuGame() {
       }
       return next;
     });
+    setMemoBoard(prev => {
+      const next = prev.map(row => row.map(cell => [...cell]));
+      for (let r = 0; r < config.br * config.bc; r++) {
+        for (let c = 0; c < config.br * config.bc; c++) {
+          if (puzzle[r][c] !== 0) continue;
+          next[r][c] = [];
+        }
+      }
+      return next;
+    });
     setSelected(null);
     setGameStatus("gave_up");
   }
@@ -193,10 +211,13 @@ function SudokuGame() {
           return;
         default:
           if (e.code >= "Digit0" && e.code <= "Digit9") {
-            const value = Number(e.code.replace("Digit", ""));
+            const digit = Number(e.code.replace("Digit", ""));
 
-            if (e.shiftKey) handleInput(value + 10);
-            else handleInput(value);
+            const inputValue = e.shiftKey ? digit + 10 : digit;
+
+            if (inputValue <= config.br * config.bc) {
+              handleInput(inputValue);
+            }
           }
       }
     }
@@ -208,6 +229,7 @@ function SudokuGame() {
     <main className={styles.game}>
       <SudokuBoard
         puzzle={current}
+        memoBoard={memoBoard}
         blockRows={config.br}
         blockColumns={config.bc}
         selected={selected}

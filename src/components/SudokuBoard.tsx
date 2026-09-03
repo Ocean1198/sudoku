@@ -3,6 +3,7 @@ import styles from './SudokuBoard.module.css'
 
 type SudokuBoardProps = {
   puzzle: CellState[][];
+  memoBoard: number[][][];
   blockRows: number;
   blockColumns: number;
   selected: {
@@ -12,7 +13,7 @@ type SudokuBoardProps = {
   onSelect: (row: number, col: number) => void;
 };
 
-function SudokuBoard({ puzzle, blockRows, blockColumns, selected, onSelect }: SudokuBoardProps) {
+function SudokuBoard({ puzzle, memoBoard, blockRows, blockColumns, selected, onSelect }: SudokuBoardProps) {
   return (
     <div
       className={styles.board}
@@ -25,6 +26,7 @@ function SudokuBoard({ puzzle, blockRows, blockColumns, selected, onSelect }: Su
             row={r}
             col={c}
             state={cell}
+            memo={memoBoard[r]?.[c] ?? []}
             isSelected={selected?.row === r && selected?.col === c}
             isBlockRight={(c + 1) % blockColumns === 0 && c + 1 < puzzle.length}
             isBlockBottom={(r + 1) % blockRows === 0 && r + 1 < puzzle.length}
