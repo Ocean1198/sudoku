@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { generate } from '../lib/sudokuGenerator';
 import { findViolations, checkAnswer } from '../lib/sudokuRules'
 import SudokuBoard from './SudokuBoard';
@@ -78,6 +78,7 @@ function SudokuGame() {
 
   const handleSelect = (row: number, col: number) => {
     if (gameStatus !== "playing") return;
+    if (row < 0 || row >= config.br * config.bc || col < 0 || col >= config.br * config.bc) return;
     setSelected({ row, col });
   };
 
@@ -137,6 +138,38 @@ function SudokuGame() {
     setSelected(null);
     setGameStatus("gave_up");
   }
+
+  // keyboard input handling
+  useEffect(() => {
+    const handleKeyDown = (e : KeyboardEvent) => {
+
+      if (selected === null) {
+        handleSelect(0, 0);
+        return;
+      }
+
+      switch (e.key) {
+        case "ArrowUp" : 
+          handleSelect(selected.row - 1, selected.col);
+          return;
+        case "ArrowDown" :
+          handleSelect(selected.row + 1, selected.col);
+          return;
+        case "ArrowLeft" :
+          handleSelect(selected.row, selected.col - 1);
+          return;
+        case "ArrowRight" :
+          handleSelect(selected.row, selected.col + 1);
+          return;
+        default : 
+          if (e.key >= "0" && e.key <= "9") {
+            handleInput(Number(e.key));
+          }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selected, gameStatus, current, puzzle, solution, config, assistState]);
 
   return (
     <main className={styles.game}>
