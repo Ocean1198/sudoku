@@ -30,6 +30,10 @@ function SudokuGame() {
   const [solution, setSolution] = useState<number[][]>(initialGame.answer);
   const [puzzle, setPuzzle] = useState<number[][]>(initialGame.puzzle);
   const [current, setCurrent] = useState<CellState[][]>(initialGame.current);
+  const [memoStatus, setMemoStatus] = useState<boolean>(false);
+  const [memoBoard, setMemoBoard] = useState<number[][][]>( // row, col, num
+    initialGame.puzzle.map(row =>row.map(() => []))
+  );
 
   const [gameStatus, setGameStatus] = useState<"playing" | "won" | "gave_up">("playing");
 
@@ -84,6 +88,11 @@ function SudokuGame() {
 
   const handleInput = (value: number) => {
     if (gameStatus !== "playing") return;
+    if (memoStatus === false) handleNumberInput(value);
+    else handleMemoInput(value);
+  }
+  
+  const handleNumberInput = (value: number) => {
     if (selected === null) return;
     if (puzzle[selected.row][selected.col] !== 0) return;
     if (current[selected.row][selected.col].value === value) return;
@@ -94,6 +103,25 @@ function SudokuGame() {
       return next;
     });
     paintBoard();
+  }
+
+  const handleMemoInput = (value: number) => {
+    if (selected === null) return;
+    setMemoBoard(prev => {
+      const next = prev.map(row => row.map(cell => [...cell]));
+      const cell = next[selected.row][selected.col];
+      if (cell.includes(value)) {
+        next[selected.row][selected.col] = cell.filter(num => num !== value);
+      } else {
+        next[selected.row][selected.col] = [...cell, value].sort((a, b) => a - b);;
+      }
+      return next;
+    });
+  }
+
+  const handleMemo = () => {
+    if (gameStatus !== "playing") return;
+    setMemoStatus(prev => !prev);
   }
 
   const handleCheck = () => {
@@ -192,6 +220,7 @@ function SudokuGame() {
       />
       <GameControls
         disabled={gameStatus !== "playing"}
+        onMemo={handleMemo}
         onCheck={handleCheck}
         onGiveUp={handleGiveUp}
       />
