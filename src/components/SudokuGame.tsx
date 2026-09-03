@@ -209,6 +209,14 @@ function SudokuGame() {
         case "Enter" : 
           handleCheck();
           return;
+        case "Backspace" :
+        case "Delete" :
+          handleInput(0);
+          return;
+        case "m" :
+        case "M" :
+          handleMemo();
+          return;
         default:
           if (e.code >= "Digit0" && e.code <= "Digit9") {
             const digit = Number(e.code.replace("Digit", ""));
