@@ -27,6 +27,13 @@
   background: #2563eb;
 }
 
+.memoActive {
+  color: #2563eb;
+  background: #fff;
+  border-color: #2563eb !important;
+  box-shadow: none;
+}
+
 .giveUpButton {
   color: #b91c1c;
   background: #fff;
