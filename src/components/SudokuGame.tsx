@@ -22,7 +22,7 @@ function createGame(br: number, bc: number, level: number, seed?: number) {
         isRevealed: false,
       }))
     ),
-    memo: puzzle.map(row => row.map(() => []))
+    memo: puzzle.map(row => row.map(() => [])),
   };
 }
 
@@ -63,6 +63,7 @@ function SudokuGame() {
     setCurrent(game.current);
     setMemoBoard(game.memo);
     setMemoStatus(false);
+    setAssistState({ hintCount: 0, wrongCheckCount: 0 });
   }
 
   const paintBoard = (): void => {
