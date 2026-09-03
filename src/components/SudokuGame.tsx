@@ -118,7 +118,9 @@ function SudokuGame() {
     setMemoBoard(prev => {
       const next = prev.map(row => row.map(cell => [...cell]));
       const cell = next[selected.row][selected.col];
-      if (cell.includes(value)) {
+      if (value === 0) {
+        next[selected.row][selected.col] = [];
+      } else if (cell.includes(value)) {
         next[selected.row][selected.col] = cell.filter(num => num !== value);
       } else {
         next[selected.row][selected.col] = [...cell, value].sort((a, b) => a - b);;
@@ -231,7 +233,7 @@ function SudokuGame() {
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selected, gameStatus, current, puzzle, solution, config, assistState]);
+  }, [selected, gameStatus, current, puzzle, solution, config, assistState, memoStatus]);
 
   return (
     <main className={styles.game}>
@@ -250,6 +252,7 @@ function SudokuGame() {
       />
       <GameControls
         disabled={gameStatus !== "playing"}
+        isMemoMode={memoStatus}
         onMemo={handleMemo}
         onCheck={handleCheck}
         onGiveUp={handleGiveUp}
