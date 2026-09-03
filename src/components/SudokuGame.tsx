@@ -139,7 +139,6 @@ function SudokuGame() {
     setGameStatus("gave_up");
   }
 
-  // keyboard input handling
   useEffect(() => {
     const handleKeyDown = (e : KeyboardEvent) => {
 
@@ -161,9 +160,15 @@ function SudokuGame() {
         case "ArrowRight" :
           handleSelect(selected.row, selected.col + 1);
           return;
-        default : 
-          if (e.key >= "0" && e.key <= "9") {
-            handleInput(Number(e.key));
+        case "Enter" : 
+          handleCheck();
+          return;
+        default:
+          if (e.code >= "Digit0" && e.code <= "Digit9") {
+            const value = Number(e.code.replace("Digit", ""));
+
+            if (e.shiftKey) handleInput(value + 10);
+            else handleInput(value);
           }
       }
     }
