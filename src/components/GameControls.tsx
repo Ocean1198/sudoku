@@ -7,13 +7,14 @@ type GameControlsProps = {
   isMemoMode: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  onHint: () => void;
   onMemo: () => void;
   onCheck: () => void;
   onRestart: () => void;
   onGiveUp: () => void;
 };
 
-function GameControls({ disabled, canUndo, canRedo, isMemoMode, onUndo, onRedo, onMemo, onCheck, onRestart, onGiveUp } : GameControlsProps) {
+function GameControls({ disabled, canUndo, canRedo, isMemoMode, onUndo, onRedo, onHint, onMemo, onCheck, onRestart, onGiveUp } : GameControlsProps) {
   return (
     <div className={styles.controls}>
       <button
@@ -25,7 +26,6 @@ function GameControls({ disabled, canUndo, canRedo, isMemoMode, onUndo, onRedo, 
       >
         <span className={styles.historyIcon} aria-hidden="true">↶</span>
       </button>
-
       <button
         className={styles.historyButton}
         onClick={onRedo}
@@ -34,6 +34,13 @@ function GameControls({ disabled, canUndo, canRedo, isMemoMode, onUndo, onRedo, 
         title="Redo"
       >
         <span className={styles.historyIcon} aria-hidden="true">↷</span>
+      </button>
+      <button
+        className={styles.historyButton}
+        onClick={onHint}
+        disabled={disabled}
+      >
+        Hint
       </button>
       <button
         className={`${styles.checkButton} ${isMemoMode ? styles.memoActive : ''}`}

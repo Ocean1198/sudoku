@@ -203,6 +203,16 @@ function SudokuGame() {
     paintBoard();
   }
 
+  const handleHint = () => {
+    if (gameStatus !== "playing") return;
+    if (selected === null) return;
+    if (puzzle[selected.row][selected.col] !== 0) return;
+    const correctValue = solution[selected.row][selected.col];
+    handleNumberInput(correctValue);
+    setAssistState(prev => ({ ...prev, hintCount: prev.hintCount + 1 }));
+    paintBoard();
+  }
+
   const handleMemo = () => {
     if (gameStatus !== "playing") return;
     setMemoStatus(prev => !prev);
@@ -347,6 +357,7 @@ function SudokuGame() {
         isMemoMode={memoStatus}
         onUndo={handleUndo}
         onRedo={handleRedo}
+        onHint={handleHint}
         onMemo={handleMemo}
         onCheck={handleCheck}
         onRestart={handleRestart}
