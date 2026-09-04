@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy Sudoku React
 
 on:
   push:
@@ -32,12 +32,20 @@ jobs:
         with:
           node-version: lts/*
           cache: npm
+          cache-dependency-path: sudoku-react/package-lock.json
 
       - name: Install dependencies
+        working-directory: ./sudoku-react
         run: npm ci
 
       - name: Build
+        working-directory: ./sudoku-react
         run: npm run build
+
+      - name: Prepare deployment
+        run: |
+          mkdir -p ./pages/sudoku-react
+          cp -r ./sudoku-react/dist/. ./pages/sudoku-react/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -45,7 +53,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: "./dist"
+          path: "./pages"
 
       - name: Deploy to GitHub Pages
         id: deployment
