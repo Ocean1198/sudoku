@@ -319,6 +319,18 @@ function SudokuGame() {
         case "M" :
           handleMemo();
           return;
+        case "z" : 
+        case "Z" : 
+          handleUndo();
+          return;
+        case "x" : 
+        case "X" : 
+          handleRedo();
+          return;
+        case "h" : 
+        case "H" : 
+          handleHint();
+          return;
         default:
           if (e.code >= "Digit0" && e.code <= "Digit9") {
             const digit = Number(e.code.replace("Digit", ""));
