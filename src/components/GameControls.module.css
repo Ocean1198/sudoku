@@ -47,3 +47,24 @@
   cursor: not-allowed;
   box-shadow: none;
 }
+
+.historyButton {
+  min-width: 86px !important;
+  color: #334155;
+  background: #f8fafc;
+  border-color: #cbd5e1 !important;
+}
+
+.historyButton:not(:disabled):hover {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #93c5fd !important;
+}
+
+.historyIcon {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 1.2rem;
+  line-height: 0;
+  vertical-align: -1px;
+}

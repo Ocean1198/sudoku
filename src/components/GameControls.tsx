@@ -15,18 +15,23 @@ function GameControls({ disabled, isMemoMode, onUndo, onRedo, onMemo, onCheck, o
   return (
     <div className={styles.controls}>
       <button
-        className={styles.checkButton}
+        className={styles.historyButton}
         onClick={onUndo}
         disabled={disabled}
+        aria-label="Undo"
+        title="Undo"
       >
-        Undo
+        <span className={styles.historyIcon} aria-hidden="true">↶</span>
       </button>
+
       <button
-        className={styles.checkButton}
+        className={styles.historyButton}
         onClick={onRedo}
         disabled={disabled}
+        aria-label="Redo"
+        title="Redo"
       >
-        Redo
+        <span className={styles.historyIcon} aria-hidden="true">↷</span>
       </button>
       <button
         className={`${styles.checkButton} ${isMemoMode ? styles.memoActive : ''}`}
