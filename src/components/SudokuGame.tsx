@@ -342,6 +342,8 @@ function SudokuGame() {
       />
       <GameControls
         disabled={gameStatus !== "playing"}
+        canUndo={undoStack.length > 0}
+        canRedo={redoStack.length > 0}
         isMemoMode={memoStatus}
         onUndo={handleUndo}
         onRedo={handleRedo}

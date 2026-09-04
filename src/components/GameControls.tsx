@@ -2,6 +2,8 @@ import styles from './GameControls.module.css';
 
 type GameControlsProps = {
   disabled: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
   isMemoMode: boolean;
   onUndo: () => void;
   onRedo: () => void;
@@ -11,13 +13,13 @@ type GameControlsProps = {
   onGiveUp: () => void;
 };
 
-function GameControls({ disabled, isMemoMode, onUndo, onRedo, onMemo, onCheck, onRestart, onGiveUp } : GameControlsProps) {
+function GameControls({ disabled, canUndo, canRedo, isMemoMode, onUndo, onRedo, onMemo, onCheck, onRestart, onGiveUp } : GameControlsProps) {
   return (
     <div className={styles.controls}>
       <button
         className={styles.historyButton}
         onClick={onUndo}
-        disabled={disabled}
+        disabled={disabled || !canUndo}
         aria-label="Undo"
         title="Undo"
       >
@@ -27,7 +29,7 @@ function GameControls({ disabled, isMemoMode, onUndo, onRedo, onMemo, onCheck, o
       <button
         className={styles.historyButton}
         onClick={onRedo}
-        disabled={disabled}
+        disabled={disabled || !canRedo}
         aria-label="Redo"
         title="Redo"
       >
