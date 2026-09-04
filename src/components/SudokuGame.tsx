@@ -42,7 +42,7 @@ function SudokuGame() {
     wrongCheckCount: number;
   }
   const [assistState, setAssistState] = useState<AssistState>({
-    hintCount: 0, // 현재는 힌트 기능이 없으므로 0으로 고정, 이후에 추가
+    hintCount: 0,
     wrongCheckCount: 0
   });
 
@@ -76,7 +76,7 @@ function SudokuGame() {
       setTimer(Math.floor((Date.now() - startTime) / 1000));
     }, 200);
     return () => clearInterval(interval);
-}, [startTime, gameStatus]);
+  }, [startTime, gameStatus]);
   
   const generateSudoku = (br: number, bc: number, level: number, seed?: number) => {
     const game = createGame(br, bc, level, seed);
