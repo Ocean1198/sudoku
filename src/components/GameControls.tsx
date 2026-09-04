@@ -5,10 +5,11 @@ type GameControlsProps = {
   isMemoMode: boolean;
   onMemo: () => void;
   onCheck: () => void;
+  onRestart: () => void;
   onGiveUp: () => void;
 };
 
-function GameControls({ disabled, isMemoMode, onMemo, onCheck, onGiveUp } : GameControlsProps) {
+function GameControls({ disabled, isMemoMode, onMemo, onCheck, onRestart, onGiveUp } : GameControlsProps) {
   return (
     <div className={styles.controls}>
       <button
@@ -26,6 +27,13 @@ function GameControls({ disabled, isMemoMode, onMemo, onCheck, onGiveUp } : Game
         disabled={disabled}
       >
         Check
+      </button>
+      <button
+        className={styles.checkButton}
+        onClick={onRestart}
+        disabled={disabled}
+      >
+        restart
       </button>
       <button
         className={styles.giveUpButton}

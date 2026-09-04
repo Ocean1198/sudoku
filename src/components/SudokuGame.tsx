@@ -159,6 +159,22 @@ function SudokuGame() {
     }
   }
 
+  const handleRestart = () => {
+    if (gameStatus !== "playing") return;
+    setCurrent(prev => {
+      const next = prev.map(row => row.slice());
+      for (let r = 0; r < config.br * config.bc; r++) {
+        for (let c = 0; c < config.br * config.bc; c++) {
+          next[r][c].value = puzzle[r][c];
+          next[r][c].isUserInput = puzzle[r][c] === 0;
+          next[r][c].isConflict = false;
+          next[r][c].isRevealed = false;
+        }
+      }
+      return next;
+    });
+  }
+
   const handleGiveUp = () => {
     if (gameStatus !== "playing") return;
     setCurrent(prev => {
@@ -256,6 +272,7 @@ function SudokuGame() {
         isMemoMode={memoStatus}
         onMemo={handleMemo}
         onCheck={handleCheck}
+        onRestart={handleRestart}
         onGiveUp={handleGiveUp}
       />
       {gameStatus !== "playing" && (
