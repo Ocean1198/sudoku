@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { generate } from '../lib/sudokuGenerator';
 import { findViolations, checkAnswer } from '../lib/sudokuRules'
+import Timer from './Timer';
 import SudokuBoard from './SudokuBoard';
 import { type CellState } from './SudokuCell';
 import NumberPad from './NumberPad';
@@ -66,6 +67,16 @@ function SudokuGame() {
   }
   const [undoStack, setUndoStack] = useState<Move[]>([]);
   const [redoStack, setRedoStack] = useState<Move[]>([]);
+
+  const [startTime, setStartTime] = useState<number | null>(Date.now);
+  const [timer, setTimer] = useState(0);
+  useEffect(() => {
+    if (startTime === null || gameStatus !== "playing") return;
+    const interval = setInterval(() => {
+      setTimer(Math.floor((Date.now() - startTime) / 1000));
+    }, 200);
+    return () => clearInterval(interval);
+}, [startTime, gameStatus]);
   
   const generateSudoku = (br: number, bc: number, level: number, seed?: number) => {
     const game = createGame(br, bc, level, seed);
@@ -349,6 +360,9 @@ function SudokuGame() {
 
   return (
     <main className={styles.game}>
+      <Timer
+        timer={timer}
+      />
       <SudokuBoard
         puzzle={current}
         memoBoard={memoBoard}
@@ -383,6 +397,8 @@ function SudokuGame() {
             generateSudoku(newConfig.br, newConfig.bc, newConfig.level, newConfig.seed);
             setGameStatus("playing");
             setSelected(null);
+            setTimer(0);
+            setStartTime(Date.now());
           }}
         />
       )}
