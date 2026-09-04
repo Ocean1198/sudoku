@@ -3,15 +3,31 @@ import styles from './GameControls.module.css';
 type GameControlsProps = {
   disabled: boolean;
   isMemoMode: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
   onMemo: () => void;
   onCheck: () => void;
   onRestart: () => void;
   onGiveUp: () => void;
 };
 
-function GameControls({ disabled, isMemoMode, onMemo, onCheck, onRestart, onGiveUp } : GameControlsProps) {
+function GameControls({ disabled, isMemoMode, onUndo, onRedo, onMemo, onCheck, onRestart, onGiveUp } : GameControlsProps) {
   return (
     <div className={styles.controls}>
+      <button
+        className={styles.checkButton}
+        onClick={onUndo}
+        disabled={disabled}
+      >
+        Undo
+      </button>
+      <button
+        className={styles.checkButton}
+        onClick={onRedo}
+        disabled={disabled}
+      >
+        Redo
+      </button>
       <button
         className={`${styles.checkButton} ${isMemoMode ? styles.memoActive : ''}`}
         onClick={onMemo}

@@ -55,6 +55,17 @@ function SudokuGame() {
     bc: 3,
     level: 0
   });
+
+  type Move = {
+    row: number;
+    col: number;
+    prevValue: number;
+    newValue: number;
+    prevMemo: number[];
+    newMemo: number[];
+  }
+  const [undoStack, setUndoStack] = useState<Move[]>([]);
+  const [redoStack, setRedoStack] = useState<Move[]>([]);
   
   const generateSudoku = (br: number, bc: number, level: number, seed?: number) => {
     const game = createGame(br, bc, level, seed);
@@ -98,6 +109,15 @@ function SudokuGame() {
     if (selected === null) return;
     if (puzzle[selected.row][selected.col] !== 0) return;
     if (current[selected.row][selected.col].value === value) return;
+    undoStack.push({
+      row: selected.row,
+      col: selected.col,
+      prevValue: current[selected.row][selected.col].value,
+      newValue: value,
+      prevMemo: memoBoard[selected.row][selected.col],
+      newMemo: []
+    });
+    redoStack.length = 0;
     setCurrent(prev => {
       const next = prev.map(row => row.slice());
       next[selected.row][selected.col].isUserInput = true;
@@ -116,18 +136,71 @@ function SudokuGame() {
     if (selected === null) return;
     if (puzzle[selected.row][selected.col] !== 0) return;
     if (current[selected.row][selected.col].value !== 0) return;
+
+    const prevMemo = memoBoard[selected.row][selected.col];
+    let newMemo: number[];
+
+    if (value === 0) {
+        newMemo = [];
+    } else if (prevMemo.includes(value)) {
+      newMemo = prevMemo.filter(num => num !== value);
+    } else {
+      newMemo = [...prevMemo, value].sort((a, b) => a - b);
+    }
+
+    undoStack.push({
+      row: selected.row,
+      col: selected.col,
+      prevValue: 0,
+      newValue: 0,
+      prevMemo: prevMemo,
+      newMemo: newMemo
+    });
+    redoStack.length = 0;
+    
     setMemoBoard(prev => {
       const next = prev.map(row => row.map(cell => [...cell]));
-      const cell = next[selected.row][selected.col];
-      if (value === 0) {
-        next[selected.row][selected.col] = [];
-      } else if (cell.includes(value)) {
-        next[selected.row][selected.col] = cell.filter(num => num !== value);
-      } else {
-        next[selected.row][selected.col] = [...cell, value].sort((a, b) => a - b);;
-      }
+      next[selected.row][selected.col] = newMemo;
       return next;
     });
+  }
+
+  const handleUndo = () => {
+    if (undoStack.length === 0) return;
+    const lastMove = undoStack[undoStack.length - 1];
+    setUndoStack(prev => prev.slice(0, -1));
+    setCurrent(prev => {
+      const next = prev.map(row => row.slice());
+      next[lastMove.row][lastMove.col].value = lastMove.prevValue;
+      next[lastMove.row][lastMove.col].isUserInput = lastMove.prevValue !== 0;
+      return next;
+    });
+    setMemoBoard(prev => {
+      const next = prev.map(row => row.map(cell => [...cell]));
+      next[lastMove.row][lastMove.col] = lastMove.prevMemo;
+      return next;
+    });
+    redoStack.push(lastMove);
+    paintBoard();
+  }
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const lastMove = redoStack[redoStack.length - 1];
+    setRedoStack(prev => prev.slice(0, -1));
+    setCurrent(prev => {
+      const next = prev.map(row => row.slice());
+      next[lastMove.row][lastMove.col].value = lastMove.newValue;
+      next[lastMove.row][lastMove.col].isUserInput = lastMove.newValue !== 0;
+      return next;
+    });
+    setMemoBoard(prev => {
+      const next = prev.map(row => row.map(cell => [...cell]));
+      next[lastMove.row][lastMove.col] = lastMove.newMemo;
+      return next;
+    });
+    undoStack.push(lastMove);
+    paintBoard();
   }
 
   const handleMemo = () => {
@@ -270,6 +343,8 @@ function SudokuGame() {
       <GameControls
         disabled={gameStatus !== "playing"}
         isMemoMode={memoStatus}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
         onMemo={handleMemo}
         onCheck={handleCheck}
         onRestart={handleRestart}
