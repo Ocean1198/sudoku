@@ -1,4 +1,4 @@
- .timer {
+.timer {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -9,6 +9,11 @@
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;
 	letter-spacing: 0.05em;
+}
+@media (prefers-color-scheme: dark) {
+  .timer {
+    color: white;
+  }
 }
 
 .label {
