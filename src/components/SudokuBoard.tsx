@@ -28,6 +28,10 @@ function SudokuBoard({ puzzle, memoBoard, blockRows, blockColumns, selected, onS
             state={cell}
             memo={memoBoard[r]?.[c] ?? []}
             isSelected={selected?.row === r && selected?.col === c}
+            isSameGroup={selected ? selected.row === r || selected.col === c ||
+                                    Math.floor(selected.row / blockRows) === Math.floor(r / blockRows) && Math.floor(selected.col / blockColumns) === Math.floor(c / blockColumns) 
+                                    : false}
+            isSameNumber={selected ? puzzle[selected.row][selected.col].value === cell.value && cell.value !== 0 : false}
             isBlockRight={(c + 1) % blockColumns === 0 && c + 1 < puzzle.length}
             isBlockBottom={(r + 1) % blockRows === 0 && r + 1 < puzzle.length}
             onSelect={onSelect}

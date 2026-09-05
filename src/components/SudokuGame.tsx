@@ -308,15 +308,19 @@ function SudokuGame() {
 
       switch (e.key) {
         case "ArrowUp" : 
+          e.preventDefault();
           handleSelect(selected.row - 1, selected.col);
           return;
         case "ArrowDown" :
+          e.preventDefault();
           handleSelect(selected.row + 1, selected.col);
           return;
         case "ArrowLeft" :
+          e.preventDefault();
           handleSelect(selected.row, selected.col - 1);
           return;
         case "ArrowRight" :
+          e.preventDefault();
           handleSelect(selected.row, selected.col + 1);
           return;
         case "Enter" : 

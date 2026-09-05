@@ -13,18 +13,22 @@ type SudokuCellProps = {
   state: CellState;
   memo: number[];
   isSelected: boolean;
+  isSameGroup: boolean;
+  isSameNumber: boolean;
   isBlockRight: boolean;
   isBlockBottom: boolean;
   onSelect: (row: number, col: number) => void;
 };
 
-function SudokuCell({ row, col, state, memo, isSelected, isBlockRight, isBlockBottom, onSelect }: SudokuCellProps) {
+function SudokuCell({ row, col, state, memo, isSelected, isSameGroup, isSameNumber, isBlockRight, isBlockBottom, onSelect }: SudokuCellProps) {
   const className = [
     styles.cell,
     state.isUserInput && styles.userInput,
     state.isConflict && styles.conflict,
     state.isRevealed && styles.revealed,
     isSelected && styles.selected,
+    isSameGroup && styles.sameGroup,
+    isSameNumber && styles.sameNumber,
     isBlockRight && styles.blockRight,
     isBlockBottom && styles.blockBottom,
   ].filter(Boolean).join(" ");

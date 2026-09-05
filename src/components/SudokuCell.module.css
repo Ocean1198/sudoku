@@ -28,6 +28,12 @@
 .userInput {
     color: #496dbc;
 }
+.sameGroup {
+    background-color: #edf5ff;
+}
+.sameNumber {
+    background-color: #cfe3fe;
+}
 .conflict {
     color: #ce4949;
     background-color: #ffbebe;
@@ -36,7 +42,7 @@
     color: #dc2626;
 }
 .selected {
-    background-color: #dbeafe;
+    background-color: #bfdbfe;
 }
 /*
 글자색
