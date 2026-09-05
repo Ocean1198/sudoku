@@ -148,33 +148,39 @@ function SudokuGame() {
     if (puzzle[selected.row][selected.col] !== 0) return;
     if (current[selected.row][selected.col].value !== 0) return;
 
-    const prevMemo = memoBoard[selected.row][selected.col];
-    let newMemo: number[];
+    const row = selected.row;
+    const col = selected.col;
 
-    if (value === 0) {
-        newMemo = [];
-    } else if (prevMemo.includes(value)) {
-      newMemo = prevMemo.filter(num => num !== value);
-    } else {
-      newMemo = [...prevMemo, value].sort((a, b) => a - b);
-    }
-
-    undoStack.push({
-      row: selected.row,
-      col: selected.col,
-      prevValue: 0,
-      newValue: 0,
-      prevMemo: prevMemo,
-      newMemo: newMemo
-    });
-    redoStack.length = 0;
-    
     setMemoBoard(prev => {
+      const prevMemo = prev[row][col];
+      let newMemo: number[];
+
+      if (value === 0) {
+        newMemo = [];
+      } else if (prevMemo.includes(value)) {
+        newMemo = prevMemo.filter(num => num !== value);
+      } else {
+        newMemo = [...prevMemo, value].sort((a, b) => a - b);
+      }
+
+      undoStack.push({
+        row,
+        col,
+        prevValue: 0,
+        newValue: 0,
+        prevMemo: [...prevMemo],
+        newMemo: [...newMemo],
+      });
+
+      redoStack.length = 0;
+
       const next = prev.map(row => row.map(cell => [...cell]));
-      next[selected.row][selected.col] = newMemo;
+      next[row][col] = newMemo;
+
       return next;
     });
-  }
+  };
+
 
   const handleUndo = () => {
     if (undoStack.length === 0) return;
