@@ -223,7 +223,6 @@ function SudokuGame() {
 
   const handleUndo = () => {
     if (undoStack.length === 0) return;
-    console.log("undoStack", undoStack[undoStack.length - 1]);
     const lastMove = undoStack[undoStack.length - 1];
     setUndoStack(prev => prev.slice(0, -1));
     setCurrent(prev => {
@@ -246,7 +245,6 @@ function SudokuGame() {
 
   const handleRedo = () => {
     if (redoStack.length === 0) return;
-    console.log("redoStack", redoStack[redoStack.length - 1]);
     const lastMove = redoStack[redoStack.length - 1];
     setRedoStack(prev => prev.slice(0, -1));
     setCurrent(prev => {
