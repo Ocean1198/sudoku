@@ -1,4 +1,5 @@
 import styles from "./NumberPad.module.css";
+import { Eraser } from 'lucide-react';
 
 type NumberPadProps = {
   disabled?: boolean;
@@ -17,7 +18,7 @@ function NumberPad ({ disabled, size, completedNumbers, onInput }: NumberPadProp
           onClick={() => onInput(i)}
           disabled={disabled}
         >
-          {i}
+          {i === 0 ? <Eraser size={18} /> : i}
         </button>
       ))}
     </div>
