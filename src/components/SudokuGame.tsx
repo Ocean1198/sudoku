@@ -92,6 +92,11 @@ function SudokuGame() {
     setMemoBoard(game.memo);
     setMemoStatus(false);
     setAssistState({ hintCount: 0, wrongCheckCount: 0 });
+    setUndoStack([]);
+    setRedoStack([]);
+    setSelected(null);
+    setStartTime(Date.now());
+    setTimer(0);
   }
 
   const paintBoard = (): void => {
