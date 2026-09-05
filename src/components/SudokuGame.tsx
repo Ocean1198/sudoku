@@ -378,6 +378,9 @@ function SudokuGame() {
       <NumberPad
         disabled={gameStatus !== "playing"}
         size={config.br * config.bc}
+        completedNumbers={Array.from({ length: config.br * config.bc + 1 }, (_, i) => {
+          return current.flat().filter(cell => cell.value === i).length >= config.br * config.bc;
+        })}
         onInput={handleInput}
       />
       <GameControls
