@@ -1,75 +1,73 @@
-# React + TypeScript + Vite
+# Sudoku
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React와 TypeScript로 만든 브라우저 기반 스도쿠 게임입니다. 기본 9×9 퍼즐뿐 아니라 블록의 행·열 크기를 바꾼 퍼즐을 생성할 수 있으며, 모든 생성 퍼즐은 유일한 해답을 갖습니다.
 
-Currently, two official plugins are available:
+현재 버전: **v1.0.0**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 주요 기능
 
-## React Compiler
+- 난이도(0–3), 블록 크기, 선택적 시드로 새 퍼즐 생성
+- 행·열·블록 및 같은 숫자 하이라이트
+- 중복 숫자 입력 시 충돌 표시와 답안 확인
+- 메모 입력과 관련 메모의 자동 제거
+- 실행 취소/다시 실행, 힌트, 재시작, 포기 및 타이머
+- 완료한 숫자 비활성화와 반응형 보드 레이아웃
+- 키보드와 숫자 패드 입력 지원
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 실행 방법
 
-## Expanding the ESLint configuration
+Node.js 20 이상을 권장합니다.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm ci
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+개발 서버가 안내하는 주소를 브라우저에서 엽니다.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 스크립트
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run dev      # 개발 서버 실행
+npm run lint     # ESLint 검사
+npm run build    # 타입 검사 후 프로덕션 빌드
+npm run preview  # 빌드 결과 미리보기
 ```
+
+프로덕션 빌드 결과는 `dist/`에 생성됩니다. GitHub Pages 프로젝트 사이트 배포를 위해 Vite의 base 경로는 `/sudoku/`로 설정되어 있습니다.
+
+## 조작 방법
+
+| 입력 | 동작 |
+| --- | --- |
+| 숫자 키 / 숫자 패드 | 선택한 칸에 숫자 입력 |
+| `Backspace` / `Delete` / 지우개 버튼 | 선택한 칸 비우기 또는 메모 지우기 |
+| 방향키 | 선택한 칸 이동 |
+| `M` | 메모 모드 전환 |
+| `Z` / `X` | 실행 취소 / 다시 실행 |
+| `H` | 선택한 칸에 힌트 입력 |
+| `Enter` | 현재 답안 확인 |
+
+메모 모드에서는 빈 사용자 입력 칸에 후보 숫자를 추가하거나 제거합니다. 숫자를 확정하면 같은 행·열·블록의 해당 메모가 자동으로 제거됩니다.
+
+## 새 게임 설정
+
+- **Block rows / Block columns**: 한 블록의 행·열 크기입니다. 전체 보드 크기는 두 값의 곱입니다.
+- **Level**: 0부터 3까지이며, 값이 클수록 더 적은 힌트로 생성됩니다.
+- **Seed**: 동일한 설정과 시드를 사용하면 같은 퍼즐을 다시 생성할 수 있습니다.
+- 현재 보드 크기는 성능과 조작성을 위해 최대 16×16으로 제한됩니다.
+
+## v1.0.0 릴리스
+
+`v1.0.0` 태그를 원격 저장소에 푸시하면 GitHub Actions가 린트와 빌드를 검증하고, 빌드된 정적 파일을 `sudoku-v1.0.0.zip` 릴리스 자산으로 첨부합니다.
+
+```bash
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+```
+
+자동 릴리스 워크플로가 필요하지 않은 경우에는 같은 태그를 GitHub의 **Releases** 화면에서 선택해 수동으로 릴리스를 만들 수 있습니다.
+
+## 라이선스
+
+이 저장소에는 아직 라이선스가 지정되어 있지 않습니다. 재사용 또는 배포 조건을 정하기 전에 프로젝트 소유자가 라이선스를 추가해야 합니다.
