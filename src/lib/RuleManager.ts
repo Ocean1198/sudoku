@@ -6,6 +6,69 @@ interface SudokuRule {
     undo(r: number, c: number, num: number): void;
 }
 
+export class Board {
+    private n: number;
+    private value: number[][];
+    private candidate: Int32Array;
+    private ruleManager: RuleManager;
+    constructor(n: number, ruleManager: RuleManager) {
+        this.n = n;
+        this.value = Array.from({ length: this.n }, () => Array(this.n).fill(0));
+        this.candidate = new Int32Array(this.n * this.n);
+        this.candidate.fill((1 << this.n) - 1);
+        this.ruleManager = ruleManager;
+    }
+    public setValue(r: number, c: number, value: number): void {
+        this.value[r][c] = value;
+        this.ruleManager.apply(r, c, value);
+
+        for (let r = 0; r < this.n; r++) {
+            for (let c = 0; c < this.n; c++) {
+                const index = r * this.n + c;
+                this.candidate[index] = this.value[r][c] === 0
+                    ? this.ruleManager.getAvailableMask(r, c)
+                    : 0;
+            }
+        }
+    }
+    public clearValue(r: number, c: number): void {
+        const value = this.value[r][c];
+        this.value[r][c] = 0;
+        this.ruleManager.undo(r, c, value);
+        for (let r = 0; r < this.n; r++) {
+            for (let c = 0; c < this.n; c++) {
+                const index = r * this.n + c;
+                this.candidate[index] = this.value[r][c] === 0
+                    ? this.ruleManager.getAvailableMask(r, c)
+                    : 0;
+            }
+        }
+    }
+    public removeCandidate(r: number, c: number, value: number) {
+        this.candidate[r * this.n + c] &= ~(1 << (value - 1));
+    }
+    public getValue(r: number, c: number): number {
+        return this.value[r][c];
+    }
+    public getCandidate(r: number, c: number): number {
+        return this.candidate[r * this.n + c];
+    }
+
+    // // 디버그용
+    public printAllValue() {
+        for (let r = 0; r < this.n; r++) {
+            console.log(this.value[r].join(" "));
+        }
+        console.log();
+    }
+    // public printAllCandidate() {
+    //     for (let r = 0; r < this.n; r++) {
+    //         console.log(this.candidate.slice(r * this.n, (r + 1) * this.n).join(" "));
+    //     }
+    //     console.log();
+    // }
+}
+
 export function makeRuleManager(br: number, bc: number, rules: RuleId[]): RuleManager {
     const n = br * bc;
     const ruleManager = new RuleManager(n);
@@ -31,10 +94,12 @@ export class RuleManager {
         this.fullMask = (1 << n) - 1;
     }
 
+    // 새로운 규칙 추가
     addRule(rule: SudokuRule) {
         this.rules.push(rule);
     }
 
+    // 규칙 기반 후보 마스크 계산
     getAvailableMask(r: number, c: number): number {
         let mask = this.fullMask;
         for (const rule of this.rules) {
@@ -44,16 +109,18 @@ export class RuleManager {
         return mask;
     }
 
+    // 규칙 적용 및 해제
     apply(r: number, c: number, num: number) {
         for (const rule of this.rules) rule.apply(r, c, num);
     }
 
+    // 되돌리기
     undo(r: number, c: number, num: number) {
         for (const rule of this.rules) rule.undo(r, c, num);
     }
 }
 
-class Classic implements SudokuRule {
+export class Classic implements SudokuRule {
     private row: Int32Array;
     private col: Int32Array;
     private box: Int32Array;
@@ -161,3 +228,16 @@ class AntiKnight implements SudokuRule {
         }
     }
 }
+
+// // 디버그용
+// const ruleManager = new RuleManager(9);
+// ruleManager.addRule(new Classic(9, 3, 3));
+// ruleManager.addRule(new XSudoku(9));
+// ruleManager.addRule(new AntiKnight(9));
+// const board = new Board(9, ruleManager);
+// console.log(board.getCandidate(0, 0))
+// board.printAllCandidate();
+
+// board.setValue(0, 0, 1);
+
+// board.printAllCandidate();
