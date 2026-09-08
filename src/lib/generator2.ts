@@ -87,6 +87,88 @@ function makeAns(br: number, bc: number, ruleManager: RuleManager, random: () =>
     return board;
 }
 
+
+// 유일해 검증을 위한 무차별 대입 풀이
+function brute_force_solver(board: number[][], br: number, bc: number, ruleManager: RuleManager): boolean {
+    const n = br * bc;
+    let sol = 0;
+
+    const emptyCells: [number, number][] = [];
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board[0].length; j++) {
+            if (board[i][j] === 0) {
+                emptyCells.push([i, j]);
+            }
+        }
+    }
+
+    function dfs(index: number): boolean {
+        if (sol >= 2) return false;
+        if (index == emptyCells.length) {
+            sol += 1;
+            return true;
+        }
+
+        const [r, c] = emptyCells[index];
+
+        const availableMask = ruleManager.getAvailableMask(r, c);
+        if (availableMask === 0) return false;
+
+        for (let i = 0; i < n; i++) {
+            if ((availableMask & (1 << i)) !== 0) {
+                const num = i + 1;
+                board[r][c] = num;
+                ruleManager.apply(r, c, num);
+
+                dfs(index + 1);
+
+                board[r][c] = 0;
+                ruleManager.undo(r, c, num);
+            }
+        }
+        return false;
+    }
+
+    dfs(0);
+    return sol === 1;
+}
+
+// level=0인 easy 전용 풀이
+// easy 여부를 반환
+function easy_solver(board: number[][], br: number, bc: number, ruleManager: RuleManager): boolean {
+
+    const n = br * bc;
+
+    const emptyCells: [number, number][] = [];
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board[0].length; j++) {
+            if (board[i][j] === 0) {
+                emptyCells.push([i, j]);
+            }
+        }
+    }
+
+    while (true) {
+        let changed = false;
+        for (let i = 0; i < emptyCells.length; i++) {
+            const [r, c] = emptyCells[i];
+            const availableMask = ruleManager.getAvailableMask(r, c);
+
+            if (availableMask !== 0 && (availableMask & (availableMask - 1)) === 0) {
+                const num = Math.log2(availableMask) + 1;
+                board[r][c] = num;
+                ruleManager.apply(r, c, num);
+                emptyCells.splice(i, 1);
+                i--;
+                changed = true;
+            }   
+        }
+        if (!changed) break;
+    }
+    if (emptyCells.length === 0) return true;
+    else return false;
+}
+
 function shuffle<T>(arr: T[], random: () => number) {
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(random() * (i + 1));
@@ -95,7 +177,6 @@ function shuffle<T>(arr: T[], random: () => number) {
         arr[j] = tmp;
     }
 }
-
 // random
 function mulberry32(seed: number): () => number {
     return function() {
