@@ -10,46 +10,61 @@ export class Board {
     private n: number;
     private value: number[][];
     private candidate: Int32Array;
+    private eliminatedByTechnique: Int32Array;
     private ruleManager: RuleManager;
+
     constructor(n: number, ruleManager: RuleManager) {
         this.n = n;
         this.value = Array.from({ length: this.n }, () => Array(this.n).fill(0));
         this.candidate = new Int32Array(this.n * this.n);
         this.candidate.fill((1 << this.n) - 1);
+        this.eliminatedByTechnique = new Int32Array(this.n * this.n);
         this.ruleManager = ruleManager;
+        this.updateAllCandidates();
     }
+
+    private updateAllCandidates() {
+        for (let r = 0; r < this.n; r++) {
+            for (let c = 0; c < this.n; c++) {
+                const index = r * this.n + c;
+                if (this.value[r][c] !== 0) {
+                    this.candidate[index] = 0;
+                } else {
+                    this.candidate[index] = this.ruleManager.getAvailableMask(r, c) & ~this.eliminatedByTechnique[index];
+                }
+            }
+        }
+    }
+
     public setValue(r: number, c: number, value: number): void {
         this.value[r][c] = value;
         this.ruleManager.apply(r, c, value);
 
-        for (let r = 0; r < this.n; r++) {
-            for (let c = 0; c < this.n; c++) {
-                const index = r * this.n + c;
-                this.candidate[index] = this.value[r][c] === 0
-                    ? this.ruleManager.getAvailableMask(r, c)
-                    : 0;
-            }
-        }
+        this.eliminatedByTechnique.fill(0);
+        this.updateAllCandidates();
     }
+
     public clearValue(r: number, c: number): void {
         const value = this.value[r][c];
         this.value[r][c] = 0;
         this.ruleManager.undo(r, c, value);
-        for (let r = 0; r < this.n; r++) {
-            for (let c = 0; c < this.n; c++) {
-                const index = r * this.n + c;
-                this.candidate[index] = this.value[r][c] === 0
-                    ? this.ruleManager.getAvailableMask(r, c)
-                    : 0;
-            }
-        }
+        
+        this.eliminatedByTechnique.fill(0);
+        this.updateAllCandidates();
     }
+
     public removeCandidate(r: number, c: number, value: number) {
-        this.candidate[r * this.n + c] &= ~(1 << (value - 1));
+        const index = r * this.n + c;
+        const bit = 1 <<  (value - 1);
+
+        this.eliminatedByTechnique[index] |= bit;
+        this.candidate[index] &= ~bit;
     }
+
     public getValue(r: number, c: number): number {
         return this.value[r][c];
     }
+    
     public getCandidate(r: number, c: number): number {
         return this.candidate[r * this.n + c];
     }
@@ -227,6 +242,15 @@ class AntiKnight implements SudokuRule {
             }
         }
     }
+}
+
+export function countBits(mask: number) : number {
+    let count = 0;
+    while (mask > 0) {
+        mask &= mask - 1;
+        count++;
+    }
+    return count;
 }
 
 // // 디버그용

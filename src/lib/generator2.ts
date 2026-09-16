@@ -1,7 +1,7 @@
 // 블록 크기, 난이도, 규칙, 시드를 입력으로 받기
 // 규칙만 받아서 직접 충돌 감지 함수 만드는 것으로 가정
 
-import { type RuleId, type RuleManager, makeRuleManager, Board } from "./RuleManager";
+import { type RuleId, makeRuleManager, Board, countBits } from "./RuleManager";
 
 export function generate(br: number, bc: number, level: number, rules: RuleId[], seed = Math.floor(Math.random() * 2 ** 32)): { answer: Board; puzzle: Board } {
     const puzzle: Board = new Board(br * bc, makeRuleManager(br, bc, rules));
@@ -12,7 +12,7 @@ export function generate(br: number, bc: number, level: number, rules: RuleId[],
     const board = new Board(br * bc, ruleManager);
 
     // 완성된 스도쿠 제작
-    const answer = makeAns(board, br * bc, ruleManager, random);
+    const answer = makeAns(board, br * bc, random);
     answer.printAllValue();
 
     return { answer, puzzle }
@@ -20,16 +20,7 @@ export function generate(br: number, bc: number, level: number, rules: RuleId[],
 
 
 // 완성된 스도쿠 제작.
-function makeAns(board: Board, n: number, ruleManager: RuleManager, random: () => number): Board {
-    
-    function countBits(mask: number) : number {
-        let count = 0;
-        while (mask > 0) {
-            mask &= mask - 1;
-            count++;
-        }
-        return count;
-    }
+function makeAns(board: Board, n: number, random: () => number): Board {
 
     function dfs(): boolean {
         let bestR = -1;
@@ -84,15 +75,15 @@ function makeAns(board: Board, n: number, ruleManager: RuleManager, random: () =
 
 
 // 유일해 검증을 위한 무차별 대입 풀이
-function brute_force_solver(board: number[][], br: number, bc: number, ruleManager: RuleManager): boolean {
+function brute_force_solver(board: Board, br: number, bc: number): boolean {
     const n = br * bc;
     let sol = 0;
 
     const emptyCells: [number, number][] = [];
-    for (let i = 0; i < board.length; i++) {
-        for (let j = 0; j < board[0].length; j++) {
-            if (board[i][j] === 0) {
-                emptyCells.push([i, j]);
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            if (board.getValue(r, c) === 0) {
+                emptyCells.push([r, c]);
             }
         }
     }
@@ -106,19 +97,16 @@ function brute_force_solver(board: number[][], br: number, bc: number, ruleManag
 
         const [r, c] = emptyCells[index];
 
-        const availableMask = ruleManager.getAvailableMask(r, c);
-        if (availableMask === 0) return false;
+        const candidates = board.getCandidate(r, c);
 
         for (let i = 0; i < n; i++) {
-            if ((availableMask & (1 << i)) !== 0) {
+            if ((candidates & (1 << i)) !== 0) {
                 const num = i + 1;
-                board[r][c] = num;
-                ruleManager.apply(r, c, num);
+                board.setValue(r, c, num);
 
                 dfs(index + 1);
 
-                board[r][c] = 0;
-                ruleManager.undo(r, c, num);
+                board.clearValue(r, c);
             }
         }
         return false;
@@ -126,42 +114,6 @@ function brute_force_solver(board: number[][], br: number, bc: number, ruleManag
 
     dfs(0);
     return sol === 1;
-}
-
-// level=0인 easy 전용 풀이
-// easy 여부를 반환
-function easy_solver(board: number[][], br: number, bc: number, ruleManager: RuleManager): boolean {
-
-    const n = br * bc;
-
-    const emptyCells: [number, number][] = [];
-    for (let i = 0; i < board.length; i++) {
-        for (let j = 0; j < board[0].length; j++) {
-            if (board[i][j] === 0) {
-                emptyCells.push([i, j]);
-            }
-        }
-    }
-
-    while (true) {
-        let changed = false;
-        for (let i = 0; i < emptyCells.length; i++) {
-            const [r, c] = emptyCells[i];
-            const availableMask = ruleManager.getAvailableMask(r, c);
-
-            if (availableMask !== 0 && (availableMask & (availableMask - 1)) === 0) {
-                const num = Math.log2(availableMask) + 1;
-                board[r][c] = num;
-                ruleManager.apply(r, c, num);
-                emptyCells.splice(i, 1);
-                i--;
-                changed = true;
-            }   
-        }
-        if (!changed) break;
-    }
-    if (emptyCells.length === 0) return true;
-    else return false;
 }
 
 function shuffle<T>(arr: T[], random: () => number) {
