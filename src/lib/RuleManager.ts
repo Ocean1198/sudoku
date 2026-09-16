@@ -1,5 +1,3 @@
-import { BrickWall, Brush } from "lucide-react";
-
 export type RuleId = "classic" | "X-Sudoku" | "Anti-Knight";
 
 interface SudokuRule {
@@ -214,24 +212,38 @@ class XSudoku implements SudokuRule {
     private n: number;
     private diag1 = 0;
     private diag2 = 0;
+
     constructor(n: number) {
         this.n = n;
     }
+
     getAvailableMask(r: number, c: number): number {
         let used = 0;
         if (r === c) used |= this.diag1;
         if (r + c === this.n - 1) used |= this.diag2;
         return ~used;
     }
+
     apply(r: number, c: number, num: number): void {
         const bit = 1 << (num - 1);
         if (r === c) this.diag1 |= bit;
         if (r + c === this.n - 1) this.diag2 |= bit;
     }
+
     undo(r: number, c: number, num: number): void {
         const bit = 1 << (num - 1);
         if (r === c) this.diag1 &= ~bit;
         if (r + c === this.n - 1) this.diag2 &= ~bit;
+    }
+
+    getHouses(): [number, number][][] {
+        const diag1: [number, number][] = [];
+        const diag2: [number, number][] = [];
+        for (let i = 0; i < this.n; i++) {
+            diag1.push([i, i]);
+            diag2.push([i, this.n - 1 - i]);
+        }
+        return [diag1, diag2];
     }
 }
 
