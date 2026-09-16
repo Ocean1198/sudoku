@@ -1,4 +1,4 @@
-import { type RuleManager, Board} from "./RuleManager";
+import { type RuleManager, Board, countBits} from "./RuleManager";
 
 type ActionType = "REMOVE_CANDIDATE" | "SET_VALUE";
 
@@ -55,6 +55,67 @@ function nakedSingle(n: number, board: Board): StepResult {
   };
 }
 
-function nakedDouble(n: number, board: Board) {
-  
+function nakedDouble(n: number, board: Board): StepResult {
+  const houses: [number, number][][] = board.getHouses();
+
+  for (const house of houses) {
+    const bivalueCells: { r: number, c: number, mask: number }[] = [];
+
+    for (const [r, c] of house) {
+      if (board.getValue(r, c) !== 0) continue;
+
+      const mask = board.getCandidate(r, c);
+      if (countBits(mask) === 2) {
+        bivalueCells.push({ r, c, mask });
+      }
+    }
+
+    for (let i = 0; i < bivalueCells.length; i++) {
+      for (let j = i + 1; i < bivalueCells.length; j++) {
+        const cell1 = bivalueCells[i];
+        const cell2 = bivalueCells[j];
+
+        if (cell1.mask === cell2.mask) {
+          const pairMask = cell1.mask;
+          const changes: Change[] = [];
+
+          for (const [r, c] of house) {
+            // 자신은 제외
+            if ((r === cell1.r && c === cell1.c) || (r === cell2.r && c === cell2.c)) continue;
+            if (board.getValue(r, c) !== 0) continue;
+
+            const currentMask = board.getCandidate(r, c);
+            const overlap = currentMask & pairMask;
+
+            if (overlap !== 0) {
+              for (let num = 1; num < n; num++) {
+                if ((overlap & (1 << num - 1)) !== 0) {
+                  board.removeCandidate(r, c, num);
+                  changes.push({
+                    row: r,
+                    col: c,
+                    action: "REMOVE_CANDIDATE",
+                    value: num
+                  });
+                }
+              }
+            }
+          }
+          if (changes.length > 0) {
+            return {
+              success: true,
+              technique: { name: "Naked Double", tier: 2 },
+              changes
+            };
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    success: false,
+    technique: {name: "Naked Double", tier: 2},
+    changes: []
+  };
 }

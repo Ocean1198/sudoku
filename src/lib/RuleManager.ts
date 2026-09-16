@@ -70,6 +70,10 @@ export class Board {
         return this.candidate[r * this.n + c];
     }
 
+    public getHouses(): [number, number][][] {
+        return this.ruleManager.getHouses();
+    }
+
     // // 디버그용
     public printAllValue() {
         for (let r = 0; r < this.n; r++) {
