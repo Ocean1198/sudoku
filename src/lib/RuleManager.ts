@@ -1,9 +1,12 @@
+import { BrickWall, Brush } from "lucide-react";
+
 export type RuleId = "classic" | "X-Sudoku" | "Anti-Knight";
 
 interface SudokuRule {
     getAvailableMask(r: number, c: number): number;
     apply(r: number, c: number, num: number): void;
     undo(r: number, c: number, num: number): void;
+    getHouses?(): [number, number][][];
 }
 
 export class Board {
@@ -64,7 +67,7 @@ export class Board {
     public getValue(r: number, c: number): number {
         return this.value[r][c];
     }
-    
+
     public getCandidate(r: number, c: number): number {
         return this.candidate[r * this.n + c];
     }
@@ -162,12 +165,48 @@ export class Classic implements SudokuRule {
         this.col[c] |= bit;
         this.box[boxIdx] |= bit;
     }
+
     undo(r: number, c: number, num: number) {
         const bit = 1 << (num - 1);
         const boxIdx = Math.floor(r / this.br) * this.br + Math.floor(c / this.bc);
         this.row[r] &= ~bit;
         this.col[c] &= ~bit;
         this.box[boxIdx] &= ~bit;
+    }
+
+    getHouses(): [number, number][][] {
+        const houses: [number, number][][] = [];
+        const n = this.br * this.bc;
+
+        // 행
+        for (let r = 0; r < n; r++) {
+            const row: [number, number][] = [];
+            for (let c = 0; c < n; c++)
+                row.push([r, c]);
+            houses.push(row);
+        }
+
+        // 열
+        for (let c = 0; c < n; c++) {
+            const col: [number, number][] = [];
+            for (let r = 0; r < n; r++)
+                col.push([r, c]);
+            houses.push(col);
+        }
+
+        // 박스
+        for (let brIdx = 0; brIdx < this.bc; brIdx++) {
+            for (let bcIdx = 0; bcIdx < this.br; bcIdx++) {
+                const box: [number, number][] = [];
+                for (let i = 0; i < this.br; i++) {
+                    for (let j = 0; j < this.bc; j++)
+                        box.push([brIdx * this.br + i, bcIdx * this.bc + j])
+                }
+                houses.push(box);
+            }
+        }
+
+        return houses;
     }
 }
 
