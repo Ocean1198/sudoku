@@ -134,6 +134,16 @@ export class RuleManager {
     undo(r: number, c: number, num: number) {
         for (const rule of this.rules) rule.undo(r, c, num);
     }
+
+    getHouses(): [number, number][][] {
+        const houses: [number, number][][] = [];
+        for (const rule of this.rules) {
+            if (rule.getHouses) {
+                houses.push(...rule.getHouses());
+            }
+        }
+        return houses;
+    }
 }
 
 export class Classic implements SudokuRule {
