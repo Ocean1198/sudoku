@@ -1,4 +1,4 @@
-import { type RuleManager, Board, countBits} from "./RuleManager";
+import { Board, countBits, makeRuleManager} from "./RuleManager";
 
 type ActionType = "REMOVE_CANDIDATE" | "SET_VALUE";
 
@@ -71,7 +71,7 @@ function nakedDouble(n: number, board: Board): StepResult {
     }
 
     for (let i = 0; i < bivalueCells.length; i++) {
-      for (let j = i + 1; i < bivalueCells.length; j++) {
+      for (let j = i + 1; j < bivalueCells.length; j++) {
         const cell1 = bivalueCells[i];
         const cell2 = bivalueCells[j];
 
@@ -88,7 +88,7 @@ function nakedDouble(n: number, board: Board): StepResult {
             const overlap = currentMask & pairMask;
 
             if (overlap !== 0) {
-              for (let num = 1; num < n; num++) {
+              for (let num = 1; num <= n; num++) {
                 if ((overlap & (1 << num - 1)) !== 0) {
                   board.removeCandidate(r, c, num);
                   changes.push({
@@ -118,4 +118,85 @@ function nakedDouble(n: number, board: Board): StepResult {
     technique: {name: "Naked Double", tier: 2},
     changes: []
   };
+}
+
+function hiddenSingle(n: number, board: Board): StepResult {
+  const houses: [number, number][][] = board.getHouses();
+
+  for (const house of houses) {
+    for (let num = 1; num <= n; num++) {
+      let count = 0;
+      let targetR = 0;
+      let targetC = 0;
+
+      for (const [r, c] of house) {
+        if (board.getValue(r, c) !== 0) continue;
+
+        const candidates = board.getCandidate(r, c);
+        if ((candidates & (1 << (num - 1))) !== 0) {
+          count++;
+          targetR = r;
+          targetC = c;
+          if (count === 2) break;
+        }
+
+        if (count === 1) {
+          board.setValue(targetR, targetC, num);
+          return {
+            success: true,
+            technique: {
+              name: "Hidden Single",
+              tier: 1
+            },
+            changes: [{
+              row: targetR,
+              col: targetC,
+              action: "SET_VALUE",
+              value: num
+            }]
+          };
+        }
+      }
+    }
+  }
+  
+  return {
+    success: false,
+    technique: {
+        name: "Hidden Single",
+        tier: 1
+    },
+    changes: []
+  };
+}
+
+const ruleManager = makeRuleManager(3, 3, ["classic"]);
+const board = new Board(9, ruleManager);
+const rowBoard = 
+  "500008010" +
+  "072105308" +
+  "190042560" +
+  "809061023" +
+  "406850009" +
+  "700900850" +
+  "961007000" +
+  "207009635" +
+  "045286701";
+
+for (let r = 0; r < 9; r++) {
+  for (let c = 0; c < 9; c++) {
+    board.setValue(r, c, parseInt(rowBoard[r * 9 + c]));
+  }
+}
+
+// technique test
+while (true) {
+  const result1 = nakedSingle(9, board);
+  if (!result1.success) break;
+  else console.log("Naked Single:", result1);
+}
+while (true) {
+  const result2 = nakedDouble(9, board);
+  if (!result2.success) break;
+  else console.log("Naked Double:", result2);
 }
