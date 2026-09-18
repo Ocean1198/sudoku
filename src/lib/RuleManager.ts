@@ -74,6 +74,18 @@ export class Board {
         return this.ruleManager.getHouses();
     }
 
+    public copyBoard(): Board {
+        const newBoard = new Board(this.n, this.ruleManager);
+        for (let r = 0; r < this.n; r++) {
+            for (let c = 0; c < this.n; c++) {
+                newBoard.value[r][c] = this.value[r][c];
+            }
+        }
+        newBoard.candidate.set(this.candidate);
+        newBoard.eliminatedByTechnique.set(this.eliminatedByTechnique);
+        return newBoard;
+    }
+
     // // 디버그용
     public printAllValue() {
         for (let r = 0; r < this.n; r++) {
