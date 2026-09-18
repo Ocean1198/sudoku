@@ -139,23 +139,22 @@ function hiddenSingle(n: number, board: Board): StepResult {
           targetC = c;
           if (count === 2) break;
         }
-
-        if (count === 1) {
-          board.setValue(targetR, targetC, num);
-          return {
-            success: true,
-            technique: {
-              name: "Hidden Single",
-              tier: 1
-            },
-            changes: [{
-              row: targetR,
-              col: targetC,
-              action: "SET_VALUE",
-              value: num
-            }]
-          };
-        }
+      }
+      if (count === 1) {
+        board.setValue(targetR, targetC, num);
+        return {
+          success: true,
+          technique: {
+            name: "Hidden Single",
+            tier: 1
+          },
+          changes: [{
+            row: targetR,
+            col: targetC,
+            action: "SET_VALUE",
+            value: num
+          }]
+        };
       }
     }
   }
@@ -170,33 +169,101 @@ function hiddenSingle(n: number, board: Board): StepResult {
   };
 }
 
-const ruleManager = makeRuleManager(3, 3, ["classic"]);
-const board = new Board(9, ruleManager);
-const rowBoard = 
-  "500008010" +
-  "072105308" +
-  "190042560" +
-  "809061023" +
-  "406850009" +
-  "700900850" +
-  "961007000" +
-  "207009635" +
-  "045286701";
+function hiddenDouble(n: number, board: Board): StepResult {
+  const houses: [number, number][][] = board.getHouses();
 
-for (let r = 0; r < 9; r++) {
-  for (let c = 0; c < 9; c++) {
-    board.setValue(r, c, parseInt(rowBoard[r * 9 + c]));
+  for (const house of houses) {
+    const numToCells: Map<number, { r: number; c: number }[]> = new Map();
+
+    for (let num = 1; num <= n; num++) {
+      const cells: { r: number; c: number }[] = [];
+      for (const [r, c] of house) {
+        if (board.getValue(r, c) !== 0) continue;
+        if ((board.getCandidate(r, c) & (1 << (num - 1))) !== 0) {
+          cells.push({ r, c });
+        }
+      }
+      if (cells.length === 2) {
+        numToCells.set(num, cells);
+      }
+    }
+
+    const candNums = Array.from(numToCells.keys());
+    for (let i = 0; i < candNums.length; i++) {
+      for (let j = i + 1; j < candNums.length; j++) {
+        const num1 = candNums[i];
+        const num2 = candNums[j];
+        const cells1 = numToCells.get(num1)!;
+        const cells2 = numToCells.get(num2)!;
+
+        if (
+          cells1[0].r === cells2[0].r && cells1[0].c === cells2[0].c &&
+          cells1[1].r === cells2[1].r && cells1[1].c === cells2[1].c
+        ) {
+          const changes: Change[] = [];
+          const targetCells = cells1;
+          const keepMask = (1 << (num1 - 1)) | (1 << (num2 - 1));
+
+          for (const cell of targetCells) {
+            const currentMask = board.getCandidate(cell.r, cell.c);
+            const removeMask = currentMask & ~keepMask;
+
+            if (removeMask !== 0) {
+              for (let num = 1; num <= n; num++) {
+                if ((removeMask & (1 << (num - 1))) !== 0) {
+                  board.removeCandidate(cell.r, cell.c, num);
+                  changes.push({
+                    row: cell.r,
+                    col: cell.c,
+                    action: "REMOVE_CANDIDATE",
+                    value: num
+                  });
+                }
+              }
+            }
+          }
+
+          if (changes.length > 0) {
+            return {
+              success: true,
+              technique: { name: "Hidden Double", tier: 3 },
+              changes
+            };
+          }
+        }
+      }
+    }
   }
+
+  return {
+    success: false,
+    technique: { name: "Hidden Double", tier: 3 },
+    changes: []
+  };
 }
 
-// technique test
-while (true) {
-  const result1 = nakedSingle(9, board);
-  if (!result1.success) break;
-  else console.log("Naked Single:", result1);
-}
-while (true) {
-  const result2 = nakedDouble(9, board);
-  if (!result2.success) break;
-  else console.log("Naked Double:", result2);
-}
+// const ruleManager = makeRuleManager(3, 3, ["classic"]);
+// const board = new Board(9, ruleManager);
+// const rowBoard = 
+//   "000000000" +
+//   "345000000" +
+//   "670012000" +
+//   "000000000" +
+//   "001000000" +
+//   "002000000" +
+//   "000000000" +
+//   "000000000" +
+//   "000000000";
+
+// for (let r = 0; r < 9; r++) {
+//   for (let c = 0; c < 9; c++) {
+//     board.setValue(r, c, parseInt(rowBoard[r * 9 + c]));
+//   }
+// }
+
+// // technique test
+// while (true) {
+//   const result1 = hiddenDouble(9, board);
+//   if (!result1.success) break;
+//   else console.log("Hidden Double:", result1);
+// }
