@@ -1,57 +1,40 @@
+import { makeRuleManager, type RuleId } from "./RuleManager";
+
 /**
  * findViolations
  * - 현재 입력된 상태에서 위반된 셀의 위치를 찾아 Set으로 반환한다.
- * - 행, 열, 블록 단위로 중복된 숫자가 있는지 확인한다.
  * @returns {Set} violations - 위반된 셀의 위치를 "r,c" 형식으로 저장한 Set
  */
-export function findViolations(current: number[][], br: number, bc: number): Set<string> {
-    const size = br * bc;
+export function findViolations(current: number[][], br: number, bc: number, rules: RuleId[]): Set<string> {
     const violations = new Set<string>();
+    const n = br * bc;
 
-    function addUnitViolations(unit: { r: number, c: number }[]) {
-        const positionsByNum = new Map();
-        for (const { r, c } of unit) {
+    const ruleManager = makeRuleManager(br, bc, rules);
+    
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            const num = current[r][c];
+            if (num !== 0) {
+                ruleManager.apply(r, c, num);
+            }
+        }
+    }
+
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
             const num = current[r][c];
             if (num === 0) continue;
+            
+            ruleManager.undo(r, c, num);
 
-            if (!positionsByNum.has(num)) {
-                positionsByNum.set(num, []);
-            }
-            positionsByNum.get(num).push({ r, c });
-        }
+            const availableMask = ruleManager.getAvailableMask(r, c);
+            const bit = 1 << (num - 1);
 
-        for (const positions of positionsByNum.values()) {
-            if (positions.length < 2) continue;
-
-            for (const { r, c } of positions) {
+            if ((availableMask & bit) === 0) {
                 violations.add(`${r},${c}`);
             }
-        }
-    }
 
-    for (let r = 0; r < size; r++) {
-        const row = [];
-        for (let c = 0; c < size; c++) {
-            row.push({ r, c });
-        }
-        addUnitViolations(row);
-    }
-    for (let c = 0; c < size; c++) {
-        const col = [];
-        for (let r = 0; r < size; r++) {
-            col.push({ r, c });
-        }
-        addUnitViolations(col);
-    }
-    for (let blockRow = 0; blockRow < size; blockRow += br) {
-        for (let blockCol = 0; blockCol < size; blockCol += bc) {
-            const block = [];
-            for (let r = blockRow; r < blockRow + br; r++) {
-                for (let c = blockCol; c < blockCol + bc; c++) {
-                    block.push({ r, c });
-                }
-            }
-            addUnitViolations(block);
+            ruleManager.apply(r, c, num);
         }
     }
 

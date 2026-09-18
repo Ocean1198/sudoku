@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { generate } from '../lib/sudokuGenerator';
-import { findViolations, checkAnswer } from '../lib/sudokuRules'
+import { generate } from '../lib/sudokuGenerator.ts';
+import { findViolations, checkAnswer } from '../lib/sudokuRules.ts';
+import { type RuleId } from '../lib/RuleManager.ts';
 import Timer from './Timer';
 import SudokuBoard from './SudokuBoard';
 import { type CellState } from './SudokuCell';
@@ -11,7 +12,8 @@ import NewGameForm from './NewGameForm';
 import styles from './SudokuGame.module.css';
 
 function createGame(br: number, bc: number, level: number, seed?: number) {
-  const { answer, puzzle } = generate(br, bc, level, seed);
+  const rules: RuleId[] = ["classic"];
+  const { answer, puzzle } = generate(br, bc, level, rules, seed);
   return {
     answer,
     puzzle,
@@ -34,6 +36,7 @@ function SudokuGame() {
   const [current, setCurrent] = useState<CellState[][]>(initialGame.current);
   const [memoStatus, setMemoStatus] = useState<boolean>(false);
   const [memoBoard, setMemoBoard] = useState<number[][][]>(initialGame.memo); // row, col, num
+  const [rules, setRules] = useState<RuleId[]>(["classic"]);
 
   const [gameStatus, setGameStatus] = useState<"playing" | "won" | "gave_up">("playing");
 
@@ -103,7 +106,7 @@ function SudokuGame() {
     setCurrent(prev => {
       const cells: CellState[][] = prev.map(row => row.map(cell => ({ ...cell })));
       const currentValue = cells.map(row => row.map(cell => cell.value));
-      const violations: Set<string> = findViolations(currentValue, config.br, config.bc);
+      const violations: Set<string> = findViolations(currentValue, config.br, config.bc, rules);
       const size = config.br * config.bc;
       for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {

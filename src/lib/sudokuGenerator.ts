@@ -1,185 +1,177 @@
-/*
-generate.js를 옮깁니다.
-findviolations, isCorrectAnswer 등 검증 로직은 sudokuRules.ts로 옮깁니다.
-*/
+// 블록 크기, 난이도, 규칙, 시드를 입력으로 받기
+// 규칙만 받아서 직접 충돌 감지 함수 만드는 것으로 가정
 
-export function generate(br: number, bc: number, level: number, seed = Math.floor(Math.random() * 2 ** 32)): { answer: number[][]; puzzle: number[][] } {
+import { Board, countBits } from "./Board";
+import { type RuleId, makeRuleManager } from "./RuleManager";
+import { nakedSingle, nakedDouble, hiddenSingle, hiddenDouble } from "./Technique"
 
-    const random: () => number = mulberry32(seed);
+// level: easy(0), normal(1), hard(2)
+export function generate(
+    br: number, 
+    bc: number, 
+    level: number, 
+    rules: RuleId[], 
+    seed = Math.floor(Math.random() * 2 ** 32)
+): { answer: number[][]; puzzle: number[][] } {
 
     const n = br * bc;
+    const random = mulberry32(seed);
 
-    const boardOri: number[][] = makeAns(br, bc, random);
-    const board: number[][] = boardOri.map(row => row.slice());
+    // 완성된 보드 제작
+    const ruleManager = makeRuleManager(br, bc, rules);
+    const answer = makeAns(new Board(n, ruleManager), n, random);    
 
-    const minHint = Math.round(n*n * [0.4, 0.35, 0.3, 0.25][level]);
-    const maxAtt = [1000, 10000, 50000, 100000][level];
-
+    // 문제 생성
+    const puzzle = answer.copyBoard();
     const randomIdx: [number, number][] = [];
     for (let r = 0; r < n; r++) 
         for (let c = 0; c < n; c++) 
             randomIdx.push([r, c]);
     shuffle(randomIdx, random);
-
-    let hint = n * n;
     for (let i = 0; i < randomIdx.length; i++) {
         const [rr, rc] = randomIdx[i];
-        const ori = board[rr][rc];
-        board[rr][rc] = 0;
-        hint -= 1;
-        const [sol, att] = solver(board, br, bc);
-        if (sol != 1) {
-            board[rr][rc] = ori;
-            hint += 1;
+        const ori = puzzle.getValue(rr, rc);
+        puzzle.clearValue(rr, rc);
+
+        if (!brute_force_solver(puzzle, br, bc) ||
+            logic_solver(puzzle, br, bc) > level) {
+            puzzle.setValue(rr, rc, ori);
         }
-        if (att > maxAtt || hint - 1 < minHint)
-            break
     }
 
-    return {
-        answer: boardOri,
-        puzzle: board,
-    };
-
+    return { answer: answer.toArray(), puzzle: puzzle.toArray() };
 }
 
-function makeAns(br: number, bc: number, random: () => number): number[][] {
 
-    const n = br * bc;
+// 완성된 스도쿠 제작.
+function makeAns(board: Board, n: number, random: () => number): Board {
 
-    const board = array2d(n);
-    const row = Array.from({length: n}, () => new Set());
-    const col = Array.from({length: n}, () => new Set());
-    const block = Array.from({length: n}, () => new Set());
+    function dfs(): boolean {
+        let bestR = -1;
+        let bestC = -1;
+        let bestAvailMask = 0;
+        let minCount = n + 1;
 
-    function dfs(r: number, c: number): boolean {
-        if (c == n) return true;
+        // 후보 적은 칸 탐색
+        for (let r = 0; r < n; r++) {
+            for (let c = 0; c < n; c++) {
+                if (board.getValue(r, c) !== 0) continue;
 
-        const blockIdx = Math.floor(r / br) * br + Math.floor(c / bc);
+                const candidates = board.getCandidate(r, c);
+                const count = countBits(candidates);
+
+                if (count < minCount) {
+                    minCount = count;
+                    bestAvailMask = candidates;
+                    bestR = r;
+                    bestC = c;
+
+                    if (minCount === 1) break;
+                }
+            }
+            if (minCount === 1) break;
+        }
+
+        // 완성
+        if (bestR === -1) return true;
+
         const available: number[] = [];
-
-        for (let i = 1; i <= n; i++) {
-            if (!row[r].has(i) &&
-                !col[c].has(i) &&
-                !block[blockIdx].has(i)){
-                available.push(i);
+        for (let num = 1; num <= n; num++) {
+            if ((bestAvailMask & (1 << (num - 1))) !== 0) {
+                available.push(num);
             }
         }
-
-        if (available.length === 0) 
-            return false;
-
         shuffle(available, random);
 
-        for (let i = 0; i < available.length; i++) {
-            const num = available[i];
-            board[r][c] = num;
-            row[r].add(num);
-            col[c].add(num);
-            block[blockIdx].add(num);
+        for (const num of available) {
+            board.setValue(bestR, bestC, num);
 
-            const result = r == n-1
-                ? dfs(0, c+1)
-                : dfs(r+1, c);
-            if (result)
-                return true;
+            if (dfs()) return true;
 
-            board[r][c] = 0;
-            row[r].delete(num);
-            col[c].delete(num);
-            block[blockIdx].delete(num);
+            board.clearValue(bestR, bestC);
         }
-
         return false;
     }
-
-    dfs(0, 0);
+    
+    dfs();
     return board;
 }
 
-function solver(board: number[][], br: number, bc: number): [number, number] {
+// 유일해 검증을 위한 무차별 대입 풀이
+function brute_force_solver(board: Board, br: number, bc: number): boolean {
     const n = br * bc;
     let sol = 0;
-    let backtrack = 0;
-    
-    const row = Array.from({length: n}, (_, i) => new Set(board[i]));
-    const col = Array.from({length: n}, (_, i) => new Set(board.map(r => r[i])));
-    const block = Array.from({length: n}, () => new Set());
 
-    const blockIdx: number[] = [];
-    
+    const emptyCells: [number, number][] = [];
     for (let r = 0; r < n; r++) {
         for (let c = 0; c < n; c++) {
-            blockIdx.push(Math.floor(r / br) * br + Math.floor(c / bc));
-        }
-    }
-    
-    const emptyCells: [number, number][] = [];
-    
-    for (let i = 0; i < board.length; i++) {
-        for (let j = 0; j < board[0].length; j++) {
-
-            if (board[i][j] === 0) {
-                emptyCells.push([i, j]);
+            if (board.getValue(r, c) === 0) {
+                emptyCells.push([r, c]);
             }
-
-            block[blockIdx[i*n + j]].add(board[i][j]);
         }
     }
-    
-    function dfs(index: number): number {
-        backtrack += 1;
-        if (sol >= 2) 
-            return 2;
+
+    function dfs(index: number): boolean {
+        if (sol >= 2) return false;
         if (index == emptyCells.length) {
-            sol += 1
-            return sol
+            sol += 1;
+            return true;
         }
-        
+
         const [r, c] = emptyCells[index];
-        const b = Math.floor(r / br) * br + Math.floor(c / bc);
-        
-        const available: number[] = [];
-        for (let i = 1; i <= n; i++) {
-            if (!row[r].has(i) &&
-                !col[c].has(i) &&
-                !block[b].has(i)){
-                available.push(i);
+
+        const candidates = board.getCandidate(r, c);
+
+        for (let i = 0; i < n; i++) {
+            if ((candidates & (1 << i)) !== 0) {
+                const num = i + 1;
+                board.setValue(r, c, num);
+
+                dfs(index + 1);
+
+                board.clearValue(r, c);
             }
         }
-        
-        for (let i = 0; i < available.length; i++) {
-            const num = available[i];
-            board[r][c] = num;
-            row[r].add(num);
-            col[c].add(num);
-            block[b].add(num)
-            
-            dfs(index + 1);
-            
-            board[r][c] = 0;
-            row[r].delete(num);
-            col[c].delete(num);
-            block[b].delete(num);
-        }
-        
-        return sol;
+        return false;
     }
-    
+
     dfs(0);
-    return [sol, backtrack];
-    
+    return sol === 1;
 }
 
-function array2d(size: number): number[][] {
-    const arr = Array.from(
-        { length: size },
-        () => new Array<number>(size)
-    );
-    for (let i = 0; i < size; i++)
-        arr[i] = new Array(size);
-    return arr;
+function logic_solver(puzzle: Board, br: number, bc: number): number {
+    const n = br * bc;
+    const board = puzzle.copyBoard();
+
+    let diff = 0;
+
+    while (true) {
+        const NSResult = nakedSingle(n, board);
+        if (NSResult.success) continue;
+        
+        const HSResult = hiddenSingle(n, board);
+        if (HSResult.success) continue;
+        
+        const NDResult = nakedDouble(n, board);
+        if (NDResult.success) {
+            if (diff === 0) diff = 1;
+            continue;
+        }
+        
+        const HDResult = hiddenDouble(n, board);
+        if (HDResult.success) {
+            if (diff === 0) diff = 1;
+            continue;
+        }
+
+        break;
+    }
+
+    const isSolved = board.getHouses().every(house => house.every(([r, c]) => board.getValue(r, c) !== 0));
+    if (!isSolved) return 2;
+    return diff;
 }
+
 function shuffle<T>(arr: T[], random: () => number) {
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(random() * (i + 1));
@@ -188,6 +180,7 @@ function shuffle<T>(arr: T[], random: () => number) {
         arr[j] = tmp;
     }
 }
+// random
 function mulberry32(seed: number): () => number {
     return function() {
         seed |= 0;
@@ -198,4 +191,8 @@ function mulberry32(seed: number): () => number {
     }
 }
 
-export default generate;
+// test
+const { puzzle, answer } = generate(3, 3, 0, ["classic", "X-Sudoku", "Anti-Knight"], 123456789);
+puzzle.forEach(row => console.log(row.join(" ")));
+console.log("=====================================");
+answer.forEach(row => console.log(row.join(" ")));
