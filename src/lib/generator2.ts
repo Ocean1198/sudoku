@@ -2,18 +2,41 @@
 // 규칙만 받아서 직접 충돌 감지 함수 만드는 것으로 가정
 
 import { type RuleId, makeRuleManager, Board, countBits } from "./RuleManager";
+import { nakedSingle, nakedDouble, hiddenSingle, hiddenDouble } from "./Technique"
 
-export function generate(br: number, bc: number, level: number, rules: RuleId[], seed = Math.floor(Math.random() * 2 ** 32)): { answer: Board; puzzle: Board } {
-    const puzzle: Board = new Board(br * bc, makeRuleManager(br, bc, rules));
+// level: easy(0), normal(1), hard(2)
+export function generate(
+    br: number, 
+    bc: number, 
+    level: number, 
+    rules: RuleId[], 
+    seed = Math.floor(Math.random() * 2 ** 32)
+): { answer: Board; puzzle: Board } {
 
-    const random: () => number = mulberry32(seed);
+    const n = br * bc;
+    const random = mulberry32(seed);
+
+    // 완성된 보드 제작
     const ruleManager = makeRuleManager(br, bc, rules);
+    const answer = makeAns(new Board(n, ruleManager), n, random);    
 
-    const board = new Board(br * bc, ruleManager);
+    // 문제 생성
+    const puzzle = answer.copyBoard();
+    const randomIdx: [number, number][] = [];
+    for (let r = 0; r < n; r++) 
+        for (let c = 0; c < n; c++) 
+            randomIdx.push([r, c]);
+    shuffle(randomIdx, random);
+    for (let i = 0; i < randomIdx.length; i++) {
+        const [rr, rc] = randomIdx[i];
+        const ori = puzzle.getValue(rr, rc);
+        puzzle.setValue(rr, rc, 0);
 
-    // 완성된 스도쿠 제작
-    const answer = makeAns(board, br * bc, random);
-    answer.printAllValue();
+        if (!brute_force_solver(puzzle, br, bc) &&
+            logic_solver(puzzle, br, bc) > level) {
+            puzzle.setValue(rr, rc, ori);
+        }
+    }
 
     return { answer, puzzle }
 }
@@ -73,7 +96,6 @@ function makeAns(board: Board, n: number, random: () => number): Board {
     return board;
 }
 
-
 // 유일해 검증을 위한 무차별 대입 풀이
 function brute_force_solver(board: Board, br: number, bc: number): boolean {
     const n = br * bc;
@@ -114,6 +136,39 @@ function brute_force_solver(board: Board, br: number, bc: number): boolean {
 
     dfs(0);
     return sol === 1;
+}
+
+function logic_solver(puzzle: Board, br: number, bc: number): number {
+    const n = br * bc;
+    const board = puzzle.copyBoard();
+
+    let diff = 0;
+
+    while (true) {
+        const NSResult = nakedSingle(n, board);
+        if (NSResult.success) continue;
+        
+        const HSResult = hiddenSingle(n, board);
+        if (HSResult.success) continue;
+        
+        const NDResult = nakedDouble(n, board);
+        if (NDResult.success) {
+            if (diff === 0) diff = 1;
+            continue;
+        }
+        
+        const HDResult = hiddenDouble(n, board);
+        if (HDResult.success) {
+            if (diff === 0) diff = 1;
+            continue;
+        }
+
+        break;
+    }
+
+    const isSolved = board.getHouses().every(house => house.every(([r, c]) => board.getValue(r, c) !== 0));
+    if (!isSolved) return 2;
+    return diff;
 }
 
 function shuffle<T>(arr: T[], random: () => number) {

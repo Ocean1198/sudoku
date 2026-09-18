@@ -18,7 +18,7 @@ interface StepResult {
   changes: Change[];   // 이번 단계에서 발생한 모든 변화 목록
 }
 
-function nakedSingle(n: number, board: Board): StepResult {
+export function nakedSingle(n: number, board: Board): StepResult {
   for (let r = 0; r < n; r++) {
     for (let c = 0; c < n; c++) {
       if (board.getValue(r, c) !== 0) continue;
@@ -55,7 +55,7 @@ function nakedSingle(n: number, board: Board): StepResult {
   };
 }
 
-function nakedDouble(n: number, board: Board): StepResult {
+export function nakedDouble(n: number, board: Board): StepResult {
   const houses: [number, number][][] = board.getHouses();
 
   for (const house of houses) {
@@ -120,7 +120,7 @@ function nakedDouble(n: number, board: Board): StepResult {
   };
 }
 
-function hiddenSingle(n: number, board: Board): StepResult {
+export function hiddenSingle(n: number, board: Board): StepResult {
   const houses: [number, number][][] = board.getHouses();
 
   for (const house of houses) {
@@ -169,7 +169,7 @@ function hiddenSingle(n: number, board: Board): StepResult {
   };
 }
 
-function hiddenDouble(n: number, board: Board): StepResult {
+export function hiddenDouble(n: number, board: Board): StepResult {
   const houses: [number, number][][] = board.getHouses();
 
   for (const house of houses) {
