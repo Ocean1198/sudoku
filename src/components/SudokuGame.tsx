@@ -11,8 +11,7 @@ import { type GameConfig } from './NewGameForm';
 import NewGameForm from './NewGameForm';
 import styles from './SudokuGame.module.css';
 
-function createGame(br: number, bc: number, level: number, seed?: number) {
-  const rules: RuleId[] = ["classic"];
+function createGame(br: number, bc: number, level: number, rules: RuleId[], seed?: number) {
   const { answer, puzzle } = generate(br, bc, level, rules, seed);
   return {
     answer,
@@ -30,13 +29,13 @@ function createGame(br: number, bc: number, level: number, seed?: number) {
 }
 
 function SudokuGame() {
-  const [initialGame] = useState(() => createGame(3, 3, 0));
+  const [rules, setRules] = useState<RuleId[]>(["classic", "X-Sudoku"]);
+  const [initialGame] = useState(() => createGame(3, 3, 0, rules));
   const [solution, setSolution] = useState<number[][]>(initialGame.answer);
   const [puzzle, setPuzzle] = useState<number[][]>(initialGame.puzzle);
   const [current, setCurrent] = useState<CellState[][]>(initialGame.current);
   const [memoStatus, setMemoStatus] = useState<boolean>(false);
   const [memoBoard, setMemoBoard] = useState<number[][][]>(initialGame.memo); // row, col, num
-  const [rules, setRules] = useState<RuleId[]>(["classic"]);
 
   const [gameStatus, setGameStatus] = useState<"playing" | "won" | "gave_up">("playing");
 
@@ -87,8 +86,8 @@ function SudokuGame() {
     return () => clearInterval(interval);
   }, [startTime, gameStatus]);
   
-  const generateSudoku = (br: number, bc: number, level: number, seed?: number) => {
-    const game = createGame(br, bc, level, seed);
+  const generateSudoku = (br: number, bc: number, level: number, rules: RuleId[], seed?: number) => {
+    const game = createGame(br, bc, level, rules, seed);
     setSolution(game.answer);
     setPuzzle(game.puzzle);
     setCurrent(game.current);
@@ -460,7 +459,7 @@ function SudokuGame() {
           initialConfig={config}
           onStart={(newConfig: GameConfig) => {
             setConfig(newConfig);
-            generateSudoku(newConfig.br, newConfig.bc, newConfig.level, newConfig.seed);
+            generateSudoku(newConfig.br, newConfig.bc, newConfig.level, rules, newConfig.seed);
             setGameStatus("playing");
             setSelected(null);
             setTimer(0);

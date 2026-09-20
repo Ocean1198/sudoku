@@ -1,4 +1,5 @@
 import { Board, countBits } from "./Board";
+import { makeRuleManager } from "./RuleManager";
 
 type ActionType = "REMOVE_CANDIDATE" | "SET_VALUE";
 
@@ -246,12 +247,12 @@ export function hiddenDouble(n: number, board: Board): StepResult {
 // const board = new Board(9, ruleManager);
 // const rowBoard = 
 //   "000000000" +
-//   "345000000" +
-//   "670012000" +
+//   "000123000" +
+//   "000789000" +
 //   "000000000" +
-//   "001000000" +
-//   "002000000" +
 //   "000000000" +
+//   "000006000" +
+//   "000004000" +
 //   "000000000" +
 //   "000000000";
 
@@ -266,4 +267,9 @@ export function hiddenDouble(n: number, board: Board): StepResult {
 //   const result1 = hiddenDouble(9, board);
 //   if (!result1.success) break;
 //   else console.log("Hidden Double:", result1);
+// }
+// while (true) {
+//   const result2 = nakedDouble(9, board);
+//   if (!result2.success) break;
+//   else console.log("Naked Double:", result2);
 // }

@@ -13,12 +13,15 @@ export function makeRuleManager(br: number, bc: number, rules: RuleId[]): RuleMa
 
     if (rules.includes("classic")) {
         ruleManager.addRule(new Classic(n, br, bc));
+        ruleManager.addRuleId("classic");
     }
     if (rules.includes("X-Sudoku")) {
         ruleManager.addRule(new XSudoku(n));
+        ruleManager.addRuleId("X-Sudoku");
     }
     if (rules.includes("Anti-Knight")) {
         ruleManager.addRule(new AntiKnight(n));
+        ruleManager.addRuleId("Anti-Knight");
     }
 
     return ruleManager;
@@ -26,6 +29,7 @@ export function makeRuleManager(br: number, bc: number, rules: RuleId[]): RuleMa
 
 export class RuleManager {
     private rules: SudokuRule[] = [];
+    private ruleId: RuleId[] = [];
     private fullMask: number;
     private br: number;
     private bc: number;
@@ -40,6 +44,10 @@ export class RuleManager {
     // 새로운 규칙 추가
     addRule(rule: SudokuRule) {
         this.rules.push(rule);
+    }
+
+    addRuleId(ruleId: RuleId) {
+        this.ruleId.push(ruleId);
     }
 
     // 규칙 기반 후보 마스크 계산
@@ -74,6 +82,10 @@ export class RuleManager {
 
     getBrBc(): { br: number, bc: number } {
         return { br: this.br, bc: this.bc };
+    }
+    
+    getRuleId(): RuleId[] {
+        return this.ruleId;
     }
 }
 

@@ -139,7 +139,7 @@ function brute_force_solver(board: Board, br: number, bc: number): boolean {
     return sol === 1;
 }
 
-function logic_solver(puzzle: Board, br: number, bc: number): number {
+function logic_solver(puzzle: Board, br: number, bc: number, printLog?: boolean): number {
     const n = br * bc;
     const board = puzzle.copyBoard();
 
@@ -147,7 +147,12 @@ function logic_solver(puzzle: Board, br: number, bc: number): number {
 
     while (true) {
         const NSResult = nakedSingle(n, board);
-        if (NSResult.success) continue;
+        if (NSResult.success) {
+            if (printLog) {
+                console.log(NSResult);
+            };
+            continue;
+        }
         
         const HSResult = hiddenSingle(n, board);
         if (HSResult.success) continue;
@@ -191,8 +196,8 @@ function mulberry32(seed: number): () => number {
     }
 }
 
-// test
-const { puzzle, answer } = generate(3, 3, 0, ["classic", "X-Sudoku", "Anti-Knight"], 123456789);
-puzzle.forEach(row => console.log(row.join(" ")));
-console.log("=====================================");
-answer.forEach(row => console.log(row.join(" ")));
+// // test
+// const { puzzle, answer } = generate(3, 3, 0, ["classic", "X-Sudoku", "Anti-Knight"], 123456789);
+// puzzle.forEach(row => console.log(row.join(" ")));
+// console.log("=====================================");
+// answer.forEach(row => console.log(row.join(" ")));
