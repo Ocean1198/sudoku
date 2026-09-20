@@ -29,7 +29,7 @@ function createGame(br: number, bc: number, level: number, rules: RuleId[], seed
 }
 
 function SudokuGame() {
-  const [rules, setRules] = useState<RuleId[]>(["classic", "X-Sudoku"]);
+  const [rules, setRules] = useState<RuleId[]>(["classic", "X-Sudoku", "Anti-Knight"]);
   const [initialGame] = useState(() => createGame(3, 3, 0, rules));
   const [solution, setSolution] = useState<number[][]>(initialGame.answer);
   const [puzzle, setPuzzle] = useState<number[][]>(initialGame.puzzle);
@@ -154,7 +154,7 @@ function SudokuGame() {
     setRedoStack([]);
 
     setCurrent(prev => {
-      const next = prev.map(row => row.slice());
+      const next = prev.map(row => row.map(cell => ({ ...cell })));
       next[selected.row][selected.col].isUserInput = true;
       next[selected.row][selected.col].value = value;
       return next;
