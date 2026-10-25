@@ -45,6 +45,8 @@ export function generate(
         if (!brute_force_solver(puzzle, br, bc) ||
             logic_solver(puzzle, br, bc) > level) {
             puzzle.setValue(rr, rc, ori);
+        } else {
+            clueCount--;
         }
     }
 
