@@ -17,6 +17,13 @@ export function generate(
     const n = br * bc;
     const random = mulberry32(seed);
 
+    const minCluesByLevel: Record<number, number> = {
+        0: 36, // easy
+        1: 30, // normal
+        2: 24, // hard
+    };
+    let clueCount = n * n;
+
     // 완성된 보드 제작
     const ruleManager = makeRuleManager(br, bc, rules);
     const answer = makeAns(new Board(n, ruleManager), n, random);    
@@ -29,6 +36,8 @@ export function generate(
             randomIdx.push([r, c]);
     shuffle(randomIdx, random);
     for (let i = 0; i < randomIdx.length; i++) {
+        if (clueCount <= minCluesByLevel[level]) break;
+        
         const [rr, rc] = randomIdx[i];
         const ori = puzzle.getValue(rr, rc);
         puzzle.clearValue(rr, rc);
