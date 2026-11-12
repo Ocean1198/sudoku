@@ -17,6 +17,13 @@ export function generate(
     const n = br * bc;
     const random = mulberry32(seed);
 
+    const minCluesByLevel: Record<number, number> = {
+        0: 36, // easy
+        1: 30, // normal
+        2: 24, // hard
+    };
+    let clueCount = n * n;
+
     // 완성된 보드 제작
     const ruleManager = makeRuleManager(br, bc, rules);
     const answer = makeAns(new Board(n, ruleManager), n, random);    
@@ -29,6 +36,8 @@ export function generate(
             randomIdx.push([r, c]);
     shuffle(randomIdx, random);
     for (let i = 0; i < randomIdx.length; i++) {
+        if (clueCount <= minCluesByLevel[level]) break;
+        
         const [rr, rc] = randomIdx[i];
         const ori = puzzle.getValue(rr, rc);
         puzzle.clearValue(rr, rc);
@@ -36,6 +45,8 @@ export function generate(
         if (!brute_force_solver(puzzle, br, bc) ||
             logic_solver(puzzle, br, bc) > level) {
             puzzle.setValue(rr, rc, ori);
+        } else {
+            clueCount--;
         }
     }
 
@@ -196,8 +207,30 @@ function mulberry32(seed: number): () => number {
     }
 }
 
-// // test
-// const { puzzle, answer } = generate(3, 3, 0, ["classic", "X-Sudoku", "Anti-Knight"], 123456789);
+// 퍼즐 생성용 코드.
+function jsontest(br: number, bc: number, level: number, rules: RuleId[], idx: number) {
+    const { puzzle, answer } = generate(br, bc, level, rules, idx);
+
+    // json format output
+    console.log("{");
+    console.log(`  "id": ${idx},`);
+    console.log(`  "blockRows": ${br},`);
+    console.log(`  "blockColumns": ${bc},`);
+    console.log(`  "rules": ${JSON.stringify(rules)},`);
+    console.log(`  "difficulty": ${level},`);
+    console.log(`  "puzzle": [\n${puzzle.map(row => "    " + JSON.stringify(row)).join(",\n")}\n  ],`);
+    console.log(`  "answer": [\n${answer.map(row => "    " + JSON.stringify(row)).join(",\n")}\n  ]`);
+    console.log("}");
+
+    // file name output
+    const rulesKey = `${rules.includes("classic") ? "1" : "0"}${rules.includes("X-Sudoku") ? "1" : "0"}${rules.includes("Anti-Knight") ? "1" : "0"}`;
+    console.log(`${br}${bc}_${level}_${rulesKey}_${String(idx).padStart(4, "0")}.json`);
+}
+
+for (let i = 1; i <= 3; i++) {
+    jsontest(3, 3, 0, ["classic", "Anti-Knight"], i);
+}
+
 // puzzle.forEach(row => console.log(row.join(" ")));
 // console.log("=====================================");
 // answer.forEach(row => console.log(row.join(" ")));

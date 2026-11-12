@@ -9,32 +9,24 @@ export function findViolations(current: number[][], br: number, bc: number, rule
     const violations = new Set<string>();
     const n = br * bc;
 
-    const ruleManager = makeRuleManager(br, bc, rules);
-    
-    for (let r = 0; r < n; r++) {
-        for (let c = 0; c < n; c++) {
-            const num = current[r][c];
-            if (num !== 0) {
-                ruleManager.apply(r, c, num);
-            }
-        }
-    }
-
     for (let r = 0; r < n; r++) {
         for (let c = 0; c < n; c++) {
             const num = current[r][c];
             if (num === 0) continue;
-            
-            ruleManager.undo(r, c, num);
 
-            const availableMask = ruleManager.getAvailableMask(r, c);
-            const bit = 1 << (num - 1);
-
-            if ((availableMask & bit) === 0) {
-                violations.add(`${r},${c}`);
+            const ruleManager = makeRuleManager(br, bc, rules);
+            for (let r2 = 0; r2 < n; r2++) {
+                for (let c2 = 0; c2 < n; c2++) {
+                    if (r !== r2 || c !== c2 && current[r2][c2] !== 0) {
+                        ruleManager.apply(r2, c2, current[r2][c2]);
+                    }
+                }
             }
 
-            ruleManager.apply(r, c, num);
+            const availableMask = ruleManager.getAvailableMask(r, c);
+            if ((availableMask & (1 << (num - 1))) === 0) {
+                violations.add(`${r},${c}`);
+            }
         }
     }
 
