@@ -207,7 +207,7 @@ function mulberry32(seed: number): () => number {
     }
 }
 
-
+// 퍼즐 생성용 코드.
 function jsontest(br: number, bc: number, level: number, rules: RuleId[], idx: number) {
     const { puzzle, answer } = generate(br, bc, level, rules, idx);
 
@@ -225,7 +225,7 @@ function jsontest(br: number, bc: number, level: number, rules: RuleId[], idx: n
     // file name output
     const rulesKey = `${rules.includes("classic") ? "1" : "0"}${rules.includes("X-Sudoku") ? "1" : "0"}${rules.includes("Anti-Knight") ? "1" : "0"}`;
     console.log(`${br}${bc}_${level}_${rulesKey}_${String(idx).padStart(4, "0")}.json`);
-}   
+}
 
 for (let i = 1; i <= 3; i++) {
     jsontest(3, 3, 0, ["classic", "Anti-Knight"], i);
