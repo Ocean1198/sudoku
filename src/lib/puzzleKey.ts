@@ -1,17 +1,22 @@
 import type { RuleId } from "./RuleManager";
 
-const RULE_ORDER: RuleId[] = ["classic", "X-Sudoku", "Anti-Knight"];
+const RULE_CODES = {
+  "classic": "classic",
+  "X-Sudoku": "x",
+  "Anti-Knight": "antiknight",
+} as const satisfies Record<RuleId, string>;
 
 export function makeRulesKey(rules: RuleId[]): string {
-  return RULE_ORDER.map(r => (rules.includes(r) ? "1" : "0")).join("");
+  const codes = (Object.entries(RULE_CODES) as [RuleId, string][])
+    .filter(([id]) => rules.includes(id))
+    .map(([, code]) => code);
+  return codes.length > 0 ? codes.join("-") : "none";
 }
 
-// 예: "33_0_111"
 export function makePuzzleKey(br: number, bc: number, level: number, rules: RuleId[]): string {
-  return `${br}${bc}_${level}_${makeRulesKey(rules)}`;
+  return `${br}x${bc}/${makeRulesKey(rules)}/${level}`;
 }
 
-// 예: "33_0_111_0002.json"
-export function makePuzzleFileName(key: string, id: number): string {
-  return `${key}_${String(id).padStart(4, "0")}.json`;
+export function makePuzzlePath(key: string, id: number): string {
+  return `${key}/${String(id).padStart(4, "0")}.json`;
 }

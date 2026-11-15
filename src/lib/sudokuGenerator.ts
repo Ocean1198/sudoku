@@ -2,6 +2,7 @@
 // 규칙만 받아서 직접 충돌 감지 함수 만드는 것으로 가정
 
 import { Board, countBits } from "./Board";
+import { makePuzzleKey, makePuzzlePath } from "./puzzleKey";
 import { type RuleId, makeRuleManager } from "./RuleManager";
 import { nakedSingle, nakedDouble, hiddenSingle, hiddenDouble } from "./Technique"
 
@@ -223,8 +224,8 @@ export function jsontest(br: number, bc: number, level: number, rules: RuleId[],
     console.log("}");
 
     // file name output
-    const rulesKey = `${rules.includes("classic") ? "1" : "0"}${rules.includes("X-Sudoku") ? "1" : "0"}${rules.includes("Anti-Knight") ? "1" : "0"}`;
-    console.log(`${br}${bc}_${level}_${rulesKey}_${String(idx).padStart(4, "0")}.json`);
+    const filePath = makePuzzlePath(makePuzzleKey(br, bc, level, rules), idx);
+    console.log(`File path: ${filePath}`);
 }
 
 // puzzle.forEach(row => console.log(row.join(" ")));

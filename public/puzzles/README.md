@@ -6,7 +6,7 @@
 모든 파일은 json 형식으로 저장되며, 파일명에 퍼즐에 대한 내용이 포함됩니다.
 
 파일명은 다음 형식을 따릅니다.
-`{blockRow}{blockCol}_{difficulty}_{rules}_{index}.json`
+`{blockRow}x{blockCol}/{rules}/{difficulty}/{index}.json`
 
 각각의 field에 대한 설명은 다음과 같습니다.
 | field | description | 
@@ -17,15 +17,15 @@
 | rules | 적용된 규칙 |
 | index | 퍼즐의 번호이자 seed |
 
-가령 `33_0_100_0001.json`은 행열 3*3의 쉬운 classic 스도쿠 중 첫 번째를 의미합니다.
+가령 `3x3/classic/0/0001.json`은 행열 3*3의 쉬운 classic 스도쿠 중 첫 번째를 의미합니다.
 
 ### rules
 현재 사용 가능한 규칙은 3가지입니다.
-| name | description | 
+| name | code | description | 
 | --- | --- |
-| classic | 기본 스도쿠 규칙입니다. |
-| X-Sudoku | 두 개의 대각선이 1~9로 이루어집니다. |
-| Anti-knight | knight의 이동 경로의 값이 모두 달라야 합니다. |
+| classic | classic | 기본 스도쿠 규칙입니다. |
+| X-Sudoku | x | 두 개의 대각선이 1~9로 이루어집니다. |
+| Anti-knight | antiknight | knight의 이동 경로의 값이 모두 달라야 합니다. |
 
 ## JSON Structure
 각 퍼즐 파일은 다음과 같은 데이터를 포함합니다.

@@ -1,6 +1,6 @@
 import type { PuzzleQuery, PuzzleRepository } from "./puzzleRepository";
 import type { StoredPuzzle } from "../types/sudoku";
-import { makePuzzleKey, makePuzzleFileName } from "./puzzleKey";
+import { makePuzzleKey, makePuzzlePath } from "./puzzleKey";
 
 type PuzzleIndex = Record<string, number[]>;
 
@@ -33,7 +33,7 @@ export class StaticPuzzleRepository implements PuzzleRepository {
     else if (ids.length > 0) id = ids[Math.floor(Math.random() * ids.length)];
     if (id === undefined) return null;
 
-    const res = await fetch(BASE + makePuzzleFileName(key, id));
+    const res = await fetch(BASE + makePuzzlePath(key, id));
     if (!res.ok) return null;
     const data = (await res.json()) as StoredPuzzle;
 
