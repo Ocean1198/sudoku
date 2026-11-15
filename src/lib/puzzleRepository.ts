@@ -1,5 +1,6 @@
 import type { RuleId } from "./RuleManager";
 import type { StoredPuzzle } from "../types/sudoku";
+import type { PuzzleLogger } from "./puzzleLogger";
 
 export interface PuzzleQuery {
 	id?: number;
@@ -10,5 +11,5 @@ export interface PuzzleQuery {
 }
 
 export interface PuzzleRepository {
-	getRandomPuzzle(query: PuzzleQuery): Promise<StoredPuzzle | null>;
+  getRandomPuzzle(query: PuzzleQuery, log?: PuzzleLogger): Promise<StoredPuzzle | null>;
 }
