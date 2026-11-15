@@ -1,5 +1,4 @@
 import { Board, countBits } from "./Board";
-import { makeRuleManager } from "./RuleManager";
 
 type ActionType = "REMOVE_CANDIDATE" | "SET_VALUE";
 

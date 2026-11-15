@@ -1,4 +1,4 @@
-import { makeRuleManager, type RuleId, type RuleManager } from "./RuleManager";
+import { makeRuleManager, type RuleManager } from "./RuleManager";
 
 export class Board {
     private n: number;

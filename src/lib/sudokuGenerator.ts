@@ -5,6 +5,10 @@ import { Board, countBits } from "./Board";
 import { type RuleId, makeRuleManager } from "./RuleManager";
 import { nakedSingle, nakedDouble, hiddenSingle, hiddenDouble } from "./Technique"
 
+// 생성 알고리즘을 바꿔 같은 seed로 다른 퍼즐이 나오게 되면 이 값을 올릴 것.
+// 저장된 퍼즐의 generatorVersion과 비교해 seed 재현성을 판단하는 데 쓰임.
+export const GENERATOR_VERSION = 1;
+
 // level: easy(0), normal(1), hard(2)
 export function generate(
     br: number, 
@@ -207,8 +211,14 @@ function mulberry32(seed: number): () => number {
     }
 }
 
-// // test
-// const { puzzle, answer } = generate(3, 3, 0, ["classic", "X-Sudoku", "Anti-Knight"], 123456789);
+// 퍼즐 생성용 코드.
+// 배열 형태의 퍼즐이 정확히 하나의 해를 갖는지 확인 (저장 전 검증용)
+export function hasUniqueSolution(puzzle: number[][], br: number, bc: number, rules: RuleId[]): boolean {
+    const board = new Board(br * bc, makeRuleManager(br, bc, rules));
+    board.fromArray(puzzle);
+    return brute_force_solver(board, br, bc);
+}
+
 // puzzle.forEach(row => console.log(row.join(" ")));
 // console.log("=====================================");
 // answer.forEach(row => console.log(row.join(" ")));
