@@ -17,7 +17,7 @@ export function findViolations(current: number[][], br: number, bc: number, rule
             const ruleManager = makeRuleManager(br, bc, rules);
             for (let r2 = 0; r2 < n; r2++) {
                 for (let c2 = 0; c2 < n; c2++) {
-                    if (r !== r2 || c !== c2 && current[r2][c2] !== 0) {
+                    if ((r !== r2 || c !== c2) && current[r2][c2] !== 0) {
                         ruleManager.apply(r2, c2, current[r2][c2]);
                     }
                 }
