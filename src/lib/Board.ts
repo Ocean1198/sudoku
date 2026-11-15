@@ -1,4 +1,4 @@
-import { makeRuleManager, type RuleId, type RuleManager } from "./RuleManager";
+import { makeRuleManager, type RuleManager } from "./RuleManager";
 
 export class Board {
     private n: number;
@@ -69,9 +69,9 @@ export class Board {
 
     public copyBoard(): Board {
         const { br, bc } = this.ruleManager.getBrBc();
-        // const rules = this.ruleManager.getRuleId();
+        const rules = this.ruleManager.getRuleId();
         // const newRuleManager = makeRuleManager(br, bc, rules);
-        const newRuleManager = makeRuleManager(br, bc, ['classic']);
+        const newRuleManager = makeRuleManager(br, bc, rules);
         const newBoard = new Board(this.n, newRuleManager);
 
         newBoard.fromArray(this.toArray());

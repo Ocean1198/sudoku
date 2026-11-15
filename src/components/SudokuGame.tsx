@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { generate } from '../lib/sudokuGenerator.ts';
+import { loadPuzzle } from '../lib/puzzleLoader.ts';
 import { findViolations, checkAnswer } from '../lib/sudokuRules.ts';
 import { type RuleId } from '../lib/RuleManager.ts';
 import Timer from './Timer';
@@ -11,8 +11,7 @@ import { type GameConfig } from './NewGameForm';
 import NewGameForm from './NewGameForm';
 import styles from './SudokuGame.module.css';
 
-function createGame(br: number, bc: number, level: number, rules: RuleId[], seed?: number) {
-  const { answer, puzzle } = generate(br, bc, level, rules, seed);
+function toGameState(answer: number[][], puzzle: number[][]) {
   return {
     answer,
     puzzle,
@@ -24,20 +23,22 @@ function createGame(br: number, bc: number, level: number, rules: RuleId[], seed
         isRevealed: false,
       }))
     ),
-    memo: puzzle.map(row => row.map(() => [])),
+    memo: puzzle.map(row => row.map(() => [] as number[])),
   };
 }
 
+const emptyBoard = (n: number) => Array.from({ length: n }, () => Array<number>(n).fill(0));
+
 function SudokuGame() {
-  const [rules, setRules] = useState<RuleId[]>(["classic", "X-Sudoku"]);
-  const [initialGame] = useState(() => createGame(3, 3, 0, rules));
+  const [rules] = useState<RuleId[]>(["classic", "X-Sudoku", "Anti-Knight"]);
+  const [initialGame] = useState(() => toGameState(emptyBoard(9), emptyBoard(9)));
   const [solution, setSolution] = useState<number[][]>(initialGame.answer);
   const [puzzle, setPuzzle] = useState<number[][]>(initialGame.puzzle);
   const [current, setCurrent] = useState<CellState[][]>(initialGame.current);
   const [memoStatus, setMemoStatus] = useState<boolean>(false);
   const [memoBoard, setMemoBoard] = useState<number[][][]>(initialGame.memo); // row, col, num
 
-  const [gameStatus, setGameStatus] = useState<"playing" | "won" | "gave_up">("playing");
+  const [gameStatus, setGameStatus] = useState<"loading" | "playing" | "won" | "gave_up">("loading");
 
   type AssistState = {
     hintCount: number;
@@ -76,7 +77,7 @@ function SudokuGame() {
   const [undoStack, setUndoStack] = useState<Move[]>([]);
   const [redoStack, setRedoStack] = useState<Move[]>([]);
 
-  const [startTime, setStartTime] = useState<number | null>(Date.now);
+  const [startTime, setStartTime] = useState<number | null>(null);
   const [timer, setTimer] = useState(0);
   useEffect(() => {
     if (startTime === null || gameStatus !== "playing") return;
@@ -86,8 +87,9 @@ function SudokuGame() {
     return () => clearInterval(interval);
   }, [startTime, gameStatus]);
   
-  const generateSudoku = (br: number, bc: number, level: number, rules: RuleId[], seed?: number) => {
-    const game = createGame(br, bc, level, rules, seed);
+  const applyGame = (newConfig: GameConfig, answer: number[][], puzzle: number[][]) => {
+    const game = toGameState(answer, puzzle);
+    setConfig(newConfig);
     setSolution(game.answer);
     setPuzzle(game.puzzle);
     setCurrent(game.current);
@@ -97,8 +99,32 @@ function SudokuGame() {
     setUndoStack([]);
     setRedoStack([]);
     setSelected(null);
-    setStartTime(Date.now());
     setTimer(0);
+    setStartTime(Date.now());
+    setGameStatus("playing");
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    loadPuzzle(config.br, config.bc, config.level, rules)
+      .then(p => { if (!cancelled) applyGame(config, p.answer, p.puzzle); })
+      .catch(e => {
+        console.error(e);
+        alert("퍼즐을 불러오지 못했습니다. 새 게임을 시작합니다.");
+        setGameStatus("gave_up");
+      });
+    return () => { cancelled = true; }
+  }, []);
+
+  const startGame = (newConfig: GameConfig) => {
+    setGameStatus("loading");
+    loadPuzzle(newConfig.br, newConfig.bc, newConfig.level, rules, newConfig.seed)
+      .then(p => applyGame(newConfig, p.answer, p.puzzle))
+      .catch(e => {
+        console.error(e);
+        alert("퍼즐을 불러오지 못했습니다. 새 게임을 시작합니다.");
+        setGameStatus("gave_up");
+      })
   }
 
   const paintBoard = (): void => {
@@ -154,7 +180,7 @@ function SudokuGame() {
     setRedoStack([]);
 
     setCurrent(prev => {
-      const next = prev.map(row => row.slice());
+      const next = prev.map(row => row.map(cell => ({ ...cell })));
       next[selected.row][selected.col].isUserInput = true;
       next[selected.row][selected.col].value = value;
       return next;
@@ -454,17 +480,11 @@ function SudokuGame() {
         onRestart={handleRestart}
         onGiveUp={handleGiveUp}
       />
-      {gameStatus !== "playing" && (
+      {gameStatus === "loading" && <p>퍼즐을 불러오는 중...</p>}
+      {(gameStatus === "won" || gameStatus === "gave_up") && (
         <NewGameForm
           initialConfig={config}
-          onStart={(newConfig: GameConfig) => {
-            setConfig(newConfig);
-            generateSudoku(newConfig.br, newConfig.bc, newConfig.level, rules, newConfig.seed);
-            setGameStatus("playing");
-            setSelected(null);
-            setTimer(0);
-            setStartTime(Date.now());
-          }}
+          onStart={(newConfig: GameConfig) => startGame(newConfig)}
         />
       )}
     </main>
