@@ -86,12 +86,6 @@ function SudokuGame() {
     }, 200);
     return () => clearInterval(interval);
   }, [startTime, gameStatus]);
-  useEffect(() => {
-    let cancelled = false;
-    loadPuzzle(config.br, config.bc, config.level, rules)
-      .then(p => { if (!cancelled) applyGame(config, p.answer, p.puzzle); });
-    return () => { cancelled = true; }
-  }, []);
   
   const applyGame = (newConfig: GameConfig, answer: number[][], puzzle: number[][]) => {
     const game = toGameState(answer, puzzle);
@@ -109,6 +103,18 @@ function SudokuGame() {
     setStartTime(Date.now());
     setGameStatus("playing");
   }
+
+  useEffect(() => {
+    let cancelled = false;
+    loadPuzzle(config.br, config.bc, config.level, rules)
+      .then(p => { if (!cancelled) applyGame(config, p.answer, p.puzzle); })
+      .catch(e => {
+        console.error(e);
+        alert("퍼즐을 불러오지 못했습니다. 새 게임을 시작합니다.");
+        setGameStatus("gave_up");
+      });
+    return () => { cancelled = true; }
+  }, []);
 
   const startGame = (newConfig: GameConfig) => {
     setGameStatus("loading");
