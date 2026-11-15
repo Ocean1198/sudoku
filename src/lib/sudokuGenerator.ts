@@ -2,9 +2,12 @@
 // 규칙만 받아서 직접 충돌 감지 함수 만드는 것으로 가정
 
 import { Board, countBits } from "./Board";
-import { makePuzzleKey, makePuzzlePath } from "./puzzleKey";
 import { type RuleId, makeRuleManager } from "./RuleManager";
 import { nakedSingle, nakedDouble, hiddenSingle, hiddenDouble } from "./Technique"
+
+// 생성 알고리즘을 바꿔 같은 seed로 다른 퍼즐이 나오게 되면 이 값을 올릴 것.
+// 저장된 퍼즐의 generatorVersion과 비교해 seed 재현성을 판단하는 데 쓰임.
+export const GENERATOR_VERSION = 1;
 
 // level: easy(0), normal(1), hard(2)
 export function generate(
@@ -209,23 +212,11 @@ function mulberry32(seed: number): () => number {
 }
 
 // 퍼즐 생성용 코드.
-export function jsontest(br: number, bc: number, level: number, rules: RuleId[], idx: number) {
-    const { puzzle, answer } = generate(br, bc, level, rules, idx);
-
-    // json format output
-    console.log("{");
-    console.log(`  "id": ${idx},`);
-    console.log(`  "blockRows": ${br},`);
-    console.log(`  "blockColumns": ${bc},`);
-    console.log(`  "rules": ${JSON.stringify(rules)},`);
-    console.log(`  "difficulty": ${level},`);
-    console.log(`  "puzzle": [\n${puzzle.map(row => "    " + JSON.stringify(row)).join(",\n")}\n  ],`);
-    console.log(`  "answer": [\n${answer.map(row => "    " + JSON.stringify(row)).join(",\n")}\n  ]`);
-    console.log("}");
-
-    // file name output
-    const filePath = makePuzzlePath(makePuzzleKey(br, bc, level, rules), idx);
-    console.log(`File path: ${filePath}`);
+// 배열 형태의 퍼즐이 정확히 하나의 해를 갖는지 확인 (저장 전 검증용)
+export function hasUniqueSolution(puzzle: number[][], br: number, bc: number, rules: RuleId[]): boolean {
+    const board = new Board(br * bc, makeRuleManager(br, bc, rules));
+    board.fromArray(puzzle);
+    return brute_force_solver(board, br, bc);
 }
 
 // puzzle.forEach(row => console.log(row.join(" ")));
