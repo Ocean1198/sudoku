@@ -30,7 +30,7 @@ function toGameState(answer: number[][], puzzle: number[][]) {
 const emptyBoard = (n: number) => Array.from({ length: n }, () => Array<number>(n).fill(0));
 
 function SudokuGame() {
-  const [rules, setRules] = useState<RuleId[]>(["classic", "X-Sudoku", "Anti-Knight"]);
+  const [rules] = useState<RuleId[]>(["classic", "X-Sudoku", "Anti-Knight"]);
   const [initialGame] = useState(() => toGameState(emptyBoard(9), emptyBoard(9)));
   const [solution, setSolution] = useState<number[][]>(initialGame.answer);
   const [puzzle, setPuzzle] = useState<number[][]>(initialGame.puzzle);
