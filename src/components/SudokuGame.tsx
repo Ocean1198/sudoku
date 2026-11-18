@@ -466,7 +466,6 @@ function SudokuGame() {
         memoBoard={memoBoard}
         blockRows={config.br}
         blockColumns={config.bc}
-        ruleManager={ruleManager}
         highlightManager={highlightManager}
         selected={selected}
         onSelect={handleSelect}

@@ -7,7 +7,6 @@ type SudokuBoardProps = {
   memoBoard: number[][][];
   blockRows: number;
   blockColumns: number;
-  ruleManager: RuleManager;
   highlightManager: RuleManager;
   selected: {
     row: number;
@@ -16,7 +15,7 @@ type SudokuBoardProps = {
   onSelect: (row: number, col: number) => void;
 };
 
-function SudokuBoard({ puzzle, memoBoard, blockRows, blockColumns, ruleManager, highlightManager, selected, onSelect }: SudokuBoardProps) {
+function SudokuBoard({ puzzle, memoBoard, blockRows, blockColumns, highlightManager, selected, onSelect }: SudokuBoardProps) {
   return (
     <div
       className={styles.board}
