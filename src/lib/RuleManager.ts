@@ -18,6 +18,7 @@ interface SudokuRule {
     apply(r: number, c: number, num: number): void;
     undo(r: number, c: number, num: number): void;
     getHouses?(): [number, number][][];
+    isPeer(r1: number, c1: number, r2: number, c2: number): boolean;
 }
 
 export function makeRuleManager(br: number, bc: number, rules: RuleId[]): RuleManager {
@@ -83,6 +84,12 @@ export class RuleManager {
         for (const rule of this.rules) rule.undo(r, c, num);
     }
 
+    // 적용된 규칙 중 하나라도 두 칸을 묶으면 true (같은 칸은 제외)
+    isPeer(r1: number, c1: number, r2: number, c2: number): boolean {
+        if (r1 === r2 && c1 === c2) return false;
+        return this.rules.some(rule => rule.isPeer(r1, c1, r2, c2));
+    }
+
     getHouses(): [number, number][][] {
         const houses: [number, number][][] = [];
         for (const rule of this.rules) {
@@ -136,6 +143,12 @@ export class Classic implements SudokuRule {
         this.row[r] &= ~bit;
         this.col[c] &= ~bit;
         this.box[boxIdx] &= ~bit;
+    }
+
+    isPeer(r1: number, c1: number, r2: number, c2: number): boolean {
+        if (r1 === r2 || c1 === c2) return true;
+        return Math.floor(r1 / this.br) === Math.floor(r2 / this.br) &&
+               Math.floor(c1 / this.bc) === Math.floor(c2 / this.bc);
     }
 
     getHouses(): [number, number][][] {
@@ -202,6 +215,12 @@ class XSudoku implements SudokuRule {
         if (r + c === this.n - 1) this.diag2 &= ~bit;
     }
 
+    isPeer(r1: number, c1: number, r2: number, c2: number): boolean {
+        const onDiag1 = r1 === c1 && r2 === c2;
+        const onDiag2 = r1 + c1 === this.n - 1 && r2 + c2 === this.n - 1;
+        return onDiag1 || onDiag2;
+    }
+
     getHouses(): [number, number][][] {
         const diag1: [number, number][] = [];
         const diag2: [number, number][] = [];
@@ -234,6 +253,12 @@ class AntiKnight implements SudokuRule {
     }
     undo(r: number, c: number, num: number) {
         this.updateNeighbors(r, c, num, -1);
+    }
+
+    isPeer(r1: number, c1: number, r2: number, c2: number): boolean {
+        const dr = Math.abs(r1 - r2);
+        const dc = Math.abs(c1 - c2);
+        return (dr === 1 && dc === 2) || (dr === 2 && dc === 1);
     }
 
     private updateNeighbors(r: number, c: number, num: number, delta: number) {

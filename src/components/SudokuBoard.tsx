@@ -1,3 +1,4 @@
+import type { RuleManager } from '../lib/RuleManager'
 import SudokuCell, { type CellState } from './SudokuCell'
 import styles from './SudokuBoard.module.css'
 
@@ -6,6 +7,7 @@ type SudokuBoardProps = {
   memoBoard: number[][][];
   blockRows: number;
   blockColumns: number;
+  ruleManager: RuleManager;
   selected: {
     row: number;
     col: number;
@@ -13,7 +15,7 @@ type SudokuBoardProps = {
   onSelect: (row: number, col: number) => void;
 };
 
-function SudokuBoard({ puzzle, memoBoard, blockRows, blockColumns, selected, onSelect }: SudokuBoardProps) {
+function SudokuBoard({ puzzle, memoBoard, blockRows, blockColumns, ruleManager, selected, onSelect }: SudokuBoardProps) {
   return (
     <div
       className={styles.board}
@@ -28,9 +30,7 @@ function SudokuBoard({ puzzle, memoBoard, blockRows, blockColumns, selected, onS
             state={cell}
             memo={memoBoard[r]?.[c] ?? []}
             isSelected={selected?.row === r && selected?.col === c}
-            isSameGroup={selected ? selected.row === r || selected.col === c ||
-                                    Math.floor(selected.row / blockRows) === Math.floor(r / blockRows) && Math.floor(selected.col / blockColumns) === Math.floor(c / blockColumns) 
-                                    : false}
+            isSameGroup={selected ? ruleManager.isPeer(selected.row, selected.col, r, c) : false}
             isSameNumber={selected ? puzzle[selected.row][selected.col].value === cell.value && cell.value !== 0 : false}
             isBlockRight={(c + 1) % blockColumns === 0 && c + 1 < puzzle.length}
             isBlockBottom={(r + 1) % blockRows === 0 && r + 1 < puzzle.length}

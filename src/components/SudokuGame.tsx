@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { makeRuleManager } from '../lib/RuleManager.ts';
 import { loadPuzzle } from '../lib/puzzleLoader.ts';
 import { findViolations, checkAnswer } from '../lib/sudokuRules.ts';
 import Timer from './Timer';
@@ -58,6 +59,11 @@ function SudokuGame() {
     level: 0,
     rules: ["classic", "X-Sudoku", "Anti-Knight"]
   });
+
+  const ruleManager = useMemo(
+    () => makeRuleManager(config.br, config.bc, config.rules),
+    [config.br, config.bc, config.rules]
+  );
 
   type Move = {
     row: number;
@@ -166,9 +172,7 @@ function SudokuGame() {
     for (let r = 0; r < config.br * config.bc; r++) {
       for (let c = 0; c < config.br * config.bc; c++) {
         if (r === selected.row && c === selected.col) continue;
-        if (r === selected.row || c === selected.col ||
-          (Math.floor(r / config.br) === Math.floor(selected.row / config.br) &&
-            Math.floor(c / config.bc) === Math.floor(selected.col / config.bc))) {
+        if (ruleManager.isPeer(r, c, selected.row, selected.col)) {
           if (memoBoard[r][c].includes(value)) {
             changedMemo.push({ row: r, col: c, removedMemo: value });
           }
@@ -190,9 +194,7 @@ function SudokuGame() {
       for (let r = 0; r < config.br * config.bc; r++) {
         for (let c = 0; c < config.br * config.bc; c++) {
           if (r === selected.row && c === selected.col) continue;
-          if (r === selected.row || c === selected.col || 
-            Math.floor(r / config.br) === Math.floor(selected.row / config.br) && 
-            Math.floor(c / config.bc) === Math.floor(selected.col / config.bc)) {
+          if (ruleManager.isPeer(r, c, selected.row, selected.col)) {
             if (next[r][c].includes(value)) {
               next[r][c] = next[r][c].filter(num => num !== value);
             }
@@ -455,6 +457,7 @@ function SudokuGame() {
         memoBoard={memoBoard}
         blockRows={config.br}
         blockColumns={config.bc}
+        ruleManager={ruleManager}
         selected={selected}
         onSelect={handleSelect}
       />
