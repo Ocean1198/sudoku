@@ -36,8 +36,6 @@ function NewGameForm({ initialConfig, onStart }: NewGameFormProps) {
     onStart({ br, bc, level, rules, ...(Number.isNaN(parsedSeed) ? {} : { seed: parsedSeed }) });
   }
 
-  console.log("NewGameForm Styles: ", styles);
-  console.log("NewGameForm Styles: ", styles.rules);
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <h2>Start a new game</h2>
