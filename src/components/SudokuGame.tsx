@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { makeRuleManager } from '../lib/RuleManager.ts';
+import { HIGHLIGHT_RULE_IDS, makeRuleManager } from '../lib/RuleManager.ts';
 import { loadPuzzle } from '../lib/puzzleLoader.ts';
 import { findViolations, checkAnswer } from '../lib/sudokuRules.ts';
 import Timer from './Timer';
@@ -62,6 +62,15 @@ function SudokuGame() {
 
   const ruleManager = useMemo(
     () => makeRuleManager(config.br, config.bc, config.rules),
+    [config.br, config.bc, config.rules]
+  );
+
+  const highlightManager = useMemo(
+    () => makeRuleManager(
+      config.br,
+      config.bc,
+      config.rules.filter(id => HIGHLIGHT_RULE_IDS.includes(id))
+    ),
     [config.br, config.bc, config.rules]
   );
 
@@ -458,6 +467,7 @@ function SudokuGame() {
         blockRows={config.br}
         blockColumns={config.bc}
         ruleManager={ruleManager}
+        highlightManager={highlightManager}
         selected={selected}
         onSelect={handleSelect}
       />

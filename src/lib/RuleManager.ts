@@ -5,13 +5,18 @@ export interface RuleOption {
     label: string;
     description: string;
     required?: boolean;
+    highlight?: boolean;
 }
 
 export const RULE_OPTIONS: RuleOption[] = [
-    { id: "classic", label: "Classic", description: "행·열·박스에 같은 숫자 금지", required: true },
-    { id: "X-Sudoku", label: "X-Sudoku", description: "두 대각선에 같은 숫자 금지" },
-    { id: "Anti-Knight", label: "Anti-Knight", description: "나이트 이동 거리에 같은 숫자 금지" },
+    { id: "classic", label: "Classic", description: "행·열·박스에 같은 숫자 금지", required: true, highlight: true },
+    { id: "X-Sudoku", label: "X-Sudoku", description: "두 대각선에 같은 숫자 금지", highlight: true },
+    { id: "Anti-Knight", label: "Anti-Knight", description: "나이트 이동 거리에 같은 숫자 금지", highlight: false },
 ];
+
+export const HIGHLIGHT_RULE_IDS: RuleId[] = RULE_OPTIONS
+    .filter(option => option.highlight)
+    .map(option => option.id);
 
 interface SudokuRule {
     getAvailableMask(r: number, c: number): number;
