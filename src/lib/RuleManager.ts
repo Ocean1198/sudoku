@@ -1,5 +1,18 @@
 export type RuleId = "classic" | "X-Sudoku" | "Anti-Knight";
 
+export interface RuleOption {
+    id: RuleId;
+    label: string;
+    description: string;
+    required?: boolean;
+}
+
+export const RULE_OPTIONS: RuleOption[] = [
+    { id: "classic", label: "Classic", description: "행·열·박스에 같은 숫자 금지", required: true },
+    { id: "X-Sudoku", label: "X-Sudoku", description: "두 대각선에 같은 숫자 금지" },
+    { id: "Anti-Knight", label: "Anti-Knight", description: "나이트 이동 거리에 같은 숫자 금지" },
+];
+
 interface SudokuRule {
     getAvailableMask(r: number, c: number): number;
     apply(r: number, c: number, num: number): void;

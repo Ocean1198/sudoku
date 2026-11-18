@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { loadPuzzle } from '../lib/puzzleLoader.ts';
 import { findViolations, checkAnswer } from '../lib/sudokuRules.ts';
-import { type RuleId } from '../lib/RuleManager.ts';
 import Timer from './Timer';
 import SudokuBoard from './SudokuBoard';
 import { type CellState } from './SudokuCell';
@@ -30,7 +29,6 @@ function toGameState(answer: number[][], puzzle: number[][]) {
 const emptyBoard = (n: number) => Array.from({ length: n }, () => Array<number>(n).fill(0));
 
 function SudokuGame() {
-  const [rules] = useState<RuleId[]>(["classic", "X-Sudoku", "Anti-Knight"]);
   const [initialGame] = useState(() => toGameState(emptyBoard(9), emptyBoard(9)));
   const [solution, setSolution] = useState<number[][]>(initialGame.answer);
   const [puzzle, setPuzzle] = useState<number[][]>(initialGame.puzzle);
@@ -57,7 +55,8 @@ function SudokuGame() {
   const [config, setConfig] = useState<GameConfig>({
     br: 3,
     bc: 3,
-    level: 0
+    level: 0,
+    rules: ["classic", "X-Sudoku", "Anti-Knight"]
   });
 
   type Move = {
@@ -106,7 +105,7 @@ function SudokuGame() {
 
   useEffect(() => {
     let cancelled = false;
-    loadPuzzle(config.br, config.bc, config.level, rules)
+    loadPuzzle(config.br, config.bc, config.level, config.rules)
       .then(p => { if (!cancelled) applyGame(config, p.answer, p.puzzle); })
       .catch(e => {
         console.error(e);
@@ -118,7 +117,7 @@ function SudokuGame() {
 
   const startGame = (newConfig: GameConfig) => {
     setGameStatus("loading");
-    loadPuzzle(newConfig.br, newConfig.bc, newConfig.level, rules, newConfig.seed)
+    loadPuzzle(newConfig.br, newConfig.bc, newConfig.level, newConfig.rules, newConfig.seed)
       .then(p => applyGame(newConfig, p.answer, p.puzzle))
       .catch(e => {
         console.error(e);
@@ -131,7 +130,7 @@ function SudokuGame() {
     setCurrent(prev => {
       const cells: CellState[][] = prev.map(row => row.map(cell => ({ ...cell })));
       const currentValue = cells.map(row => row.map(cell => cell.value));
-      const violations: Set<string> = findViolations(currentValue, config.br, config.bc, rules);
+      const violations: Set<string> = findViolations(currentValue, config.br, config.bc, config.rules);
       const size = config.br * config.bc;
       for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
